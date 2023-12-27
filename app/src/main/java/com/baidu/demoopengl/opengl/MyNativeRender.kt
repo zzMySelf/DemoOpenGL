@@ -1,4 +1,4 @@
-package com.baidu.demoopengl
+package com.baidu.demoopengl.opengl
 
 /**
  * Day：2023/9/14 19:24

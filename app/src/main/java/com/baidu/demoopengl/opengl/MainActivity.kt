@@ -1,4 +1,4 @@
-package com.baidu.demoopengl
+package com.baidu.demoopengl.opengl
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

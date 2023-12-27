@@ -1,4 +1,4 @@
-package com.baidu.demoopengl
+package com.baidu.demoopengl.opengl
 
 import android.content.Context
 import android.opengl.GLSurfaceView
