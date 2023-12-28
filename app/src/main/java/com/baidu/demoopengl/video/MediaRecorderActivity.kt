@@ -1,7 +1,10 @@
 package com.baidu.demoopengl.video
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.media.CamcorderProfile
 import android.media.MediaRecorder
@@ -9,8 +12,12 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.SurfaceView
+import android.view.TextureView
+import android.view.TextureView.SurfaceTextureListener
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.baidu.demoopengl.R
 import java.io.File
 import java.util.*
@@ -32,6 +39,7 @@ class MediaRecorderActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "MediaRecorderActivity"
+        private val REQUEST_CAMERA_PERMISSION = 200
 
         fun start(context: Context) {
             val intent = Intent(context, MediaRecorderActivity::class.java)
@@ -42,8 +50,16 @@ class MediaRecorderActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_recorder)
-        initView()
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                REQUEST_CAMERA_PERMISSION)
+        } else {
+            initView()
+        }
     }
 
     private fun initView() {
