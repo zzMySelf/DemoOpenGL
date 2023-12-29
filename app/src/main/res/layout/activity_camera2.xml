@@ -6,10 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".video.MediaRecorderActivity">
 
-    <TextureView
+    <com.baidu.demoopengl.AutoRatioTextureView
         android:id="@+id/textureView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintDimensionRatio="9:16"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/record_btn"
@@ -28,6 +32,16 @@
         app:layout_constraintBottom_toBottomOf="@+id/record_btn"
         app:layout_constraintStart_toEndOf="@+id/record_btn"
         app:layout_constraintTop_toTopOf="@+id/record_btn" />
+
+    <Button
+        android:id="@+id/switch_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:text="switch back"
+        app:layout_constraintBottom_toBottomOf="@+id/play_btn"
+        app:layout_constraintStart_toEndOf="@+id/play_btn"
+        app:layout_constraintTop_toTopOf="@+id/play_btn" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

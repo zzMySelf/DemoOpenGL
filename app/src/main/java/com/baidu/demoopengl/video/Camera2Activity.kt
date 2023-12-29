@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Rect
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
 import android.media.ImageReader
@@ -15,13 +14,18 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
+import android.view.Display
 import android.view.Surface
 import android.view.TextureView
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.baidu.demoopengl.AutoRatioTextureView
 import com.baidu.demoopengl.R
 import java.io.File
 import java.io.IOException
@@ -55,19 +59,14 @@ class Camera2Activity : AppCompatActivity() {
     private var frontCameraCs: CameraCharacteristics? = null
     private var frontCameraId: String? = null
 
-    private  var mediaCodec: MediaCodec? = null
-    private  var codecInputSurface: Surface? = null
-
-    private var isRecording = false
-    private  var outputFile: File? = null
-
     private var backgroundHandler: Handler? = null
 
-    private var imageReader: ImageReader? = null
-
-    private val textureView by lazy { findViewById<TextureView>(R.id.textureView) }
+    private val textureView by lazy { findViewById<AutoRatioTextureView>(R.id.textureView) }
     private val recordBtn by lazy { findViewById<Button>(R.id.record_btn) }
     private val playBtn by lazy { findViewById<Button>(R.id.play_btn) }
+    private val switchBtn by lazy { findViewById<Button>(R.id.switch_btn) }
+
+    private val isFrontCamera = MutableLiveData<Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,13 +85,27 @@ class Camera2Activity : AppCompatActivity() {
             initCamera()
             openCamera()
         }
+
+        initObserver()
+    }
+
+    private fun initObserver() {
+        isFrontCamera.observe(this) {
+            if (it) {
+                switchBtn.text = "switch front"
+            } else {
+                switchBtn.text = "switch back"
+            }
+            initCamera()
+            openCamera(isPreview = true)
+        }
     }
 
     private fun initView() {
         textureView.surfaceTextureListener = object : TextureView.SurfaceTextureListener {
             override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
                 Log.w(TAG, "=====> onSurfaceTextureAvailable width:$width height:$height")
-                startPreview(width, height)
+                startPreview()
             }
 
             override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
@@ -107,6 +120,11 @@ class Camera2Activity : AppCompatActivity() {
             override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
             }
         }
+        switchBtn.setOnClickListener {
+            releaseCamera()
+            val value = isFrontCamera.value ?: false
+            isFrontCamera.value = !value
+        }
     }
 
     private fun initCamera() {
@@ -116,10 +134,10 @@ class Camera2Activity : AppCompatActivity() {
         backgroundHandler = Handler(backgroundThread.looper)
     }
 
-    private fun openCamera() {
+    private fun openCamera(isPreview: Boolean = false) {
         try {
             findCameraId()
-            val cameraId = backCameraId
+            val cameraId = getCurrentCameraId()
             if (cameraId.isNullOrEmpty()) {
                 return
             }
@@ -136,6 +154,9 @@ class Camera2Activity : AppCompatActivity() {
             cameraManager?.openCamera(cameraId, object : CameraDevice.StateCallback() {
                 override fun onOpened(camera: CameraDevice) {
                     cameraDevice = camera
+                    if (isPreview) {
+                        startPreview()
+                    }
                 }
 
                 override fun onDisconnected(camera: CameraDevice) {
@@ -181,26 +202,27 @@ class Camera2Activity : AppCompatActivity() {
         }
     }
 
-    private fun startPreview(textureWidth: Int, textureHeight: Int) {
+    private fun startPreview() {
         try {
             val surfaceTexture = textureView.surfaceTexture
             previewSize?.let {
                 surfaceTexture?.setDefaultBufferSize(it.width, it.height)
+
+                getCurrentCameraCcs()?.let { ccs ->
+                    textureView?.setAspectRatio(it.width, it.height, computeRelativeRotation(ccs))
+                }
             }
             val previewSurface = Surface(surfaceTexture)
             // 创建预览请求 TEMPLATE_PREVIEW
-            val previewRequestBuilder = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
-            previewRequestBuilder?.addTarget(previewSurface)
-            previewSize?.let {
-                previewRequestBuilder?.set(CaptureRequest.SCALER_CROP_REGION, calculateCropRegion(it, Size(textureWidth, textureHeight)))
-            }
+            val captureRequest = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            captureRequest?.addTarget(previewSurface)
 
             cameraDevice?.createCaptureSession(listOf(previewSurface), object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(session: CameraCaptureSession) {
                     captureSession = session
                     try {
-                        previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                        val captureRequest = previewRequestBuilder?.build()
+//                        previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                        val captureRequest = captureRequest?.build()
                         if (captureRequest != null) {
                             session.setRepeatingRequest(captureRequest, null, backgroundHandler)
                         }
@@ -218,50 +240,57 @@ class Camera2Activity : AppCompatActivity() {
         }
     }
 
-    private fun calculateCropRegion(previewSize: Size, textureViewSize: Size): Rect {
-        val previewRatio = previewSize.width.toFloat() / previewSize.height
-        val viewRatio = textureViewSize.width.toFloat() / textureViewSize.height
-        val cropWidth: Int
-        val cropHeight: Int
-        if (previewRatio > viewRatio) {
-            cropWidth = previewSize.width
-            cropHeight = (previewSize.width / viewRatio).toInt()
+    private fun getCurrentCameraId(): String? {
+        return if (isFrontCamera.value == true) {
+            frontCameraId
         } else {
-            cropWidth = (previewSize.height * viewRatio).toInt()
-            cropHeight = previewSize.height
-        }
-        val x = (previewSize.width - cropWidth) / 2
-        val y = (previewSize.height - cropHeight) / 2
-        return Rect(x, y, x + cropWidth, y + cropHeight)
-    }
-
-    private fun createMediaCodec() {
-        try {
-            // 创建 MediaCodec 实例
-            mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
-
-            // 创建视频格式
-            val format = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, 1920, 1080)
-            mediaCodec?.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-
-            // 获取用于输入数据的 Surface
-            codecInputSurface = mediaCodec?.createInputSurface()
-
-            // 其他初始化和设置 MediaCodec 的步骤...
-        } catch (e: IOException) {
-            e.printStackTrace()
+            backCameraId
         }
     }
 
-    private fun startRecording() {
-        // 启动录制视频的逻辑，包括启动 MediaCodec、处理输入数据等
-        // 具体步骤可以参考 MediaCodec 的使用文档
+    private fun getCurrentCameraCcs(): CameraCharacteristics? {
+        return if (isFrontCamera.value == true) {
+            frontCameraCs
+        } else {
+            backCameraCs
+        }
     }
 
-    private fun stopRecording() {
-        // 停止录制视频的逻辑，释放资源等
-        // 具体步骤可以参考 MediaCodec 的使用文档
+    /**
+     * 获取当前设备屏幕的旋转角度
+     */
+    private fun getDeviceScreenRotation(context: Context): Int {
+        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        val display: Display? = windowManager.defaultDisplay
+
+        if (display != null) {
+            return when (display.rotation) {
+                Surface.ROTATION_0 -> 0
+                Surface.ROTATION_90 -> 90
+                Surface.ROTATION_180 -> 180
+                Surface.ROTATION_270 -> 270
+                else -> 0
+            }
+        }
+
+        return 0
     }
+
+    private fun computeRelativeRotation(characteristics: CameraCharacteristics): Int {
+        val sensorOrientationDegrees =
+            characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: return 0
+        val surfaceRotationDegrees = getDeviceScreenRotation(this)
+
+        // Reverse device orientation for back-facing cameras.
+        val sign = if (characteristics.get(CameraCharacteristics.LENS_FACING) ==
+            CameraCharacteristics.LENS_FACING_FRONT
+        ) 1 else -1
+
+        // Calculate desired orientation relative to camera orientation to make
+        // the image upright relative to the device orientation.
+        return (sensorOrientationDegrees - surfaceRotationDegrees * sign + 360) % 360
+    }
+
 
     private fun releaseCamera() {
         // 释放 Camera 相关资源
@@ -269,15 +298,10 @@ class Camera2Activity : AppCompatActivity() {
         cameraDevice?.close()
     }
 
-    private fun releaseMediaCodec() {
-        // 释放 MediaCodec 相关资源
-        mediaCodec?.stop()
-        mediaCodec?.release()
-    }
-
     override fun onDestroy() {
         super.onDestroy()
         releaseCamera()
-        releaseMediaCodec()
+        backgroundHandler?.removeCallbacksAndMessages(null)
+        backgroundHandler = null
     }
 }
