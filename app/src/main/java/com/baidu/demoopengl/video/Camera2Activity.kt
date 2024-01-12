@@ -61,7 +61,7 @@ class Camera2Activity : AppCompatActivity() {
 
     private var backgroundHandler: Handler? = null
 
-    private val textureView by lazy { findViewById<AutoRatioTextureView>(R.id.textureView) }
+    private val textureView by lazy { findViewById<TextureView>(R.id.textureView) }
     private val recordBtn by lazy { findViewById<Button>(R.id.record_btn) }
     private val playBtn by lazy { findViewById<Button>(R.id.play_btn) }
     private val switchBtn by lazy { findViewById<Button>(R.id.switch_btn) }
@@ -180,15 +180,21 @@ class Camera2Activity : AppCompatActivity() {
             cameraManager?.let {
                 // 获取当前手机的所有摄像头id
                 for (cameraId in it.cameraIdList) {
-                    // 通过id获取对应相机信息结构
-                    // 相机信息提供类，类内部有很多相机信息常量，
-                    // 其中有代表相机方向的 LENS_FACING；
-                    // 判断闪光灯是否可用的 FLASH_INFO_AVAILABLE；
-                    // 获取所有可用 AE 模式的 CONTROL_AE_AVAILABLE_MODES
+                    /**
+                     *  通过id获取对应相机信息结构
+                     *  相机信息提供类，类内部有很多相机信息常量，
+                     *  其中有代表相机方向的 LENS_FACING；
+                     *  判断闪光灯是否可用的 FLASH_INFO_AVAILABLE；
+                     *  获取所有可用 AE 模式的 CONTROL_AE_AVAILABLE_MODES
+                     */
                     val characteristics = it.getCameraCharacteristics(cameraId)
                     //获取前置/后置摄像头
                     val facing = characteristics.get(CameraCharacteristics.LENS_FACING)
                     if (facing == CameraCharacteristics.LENS_FACING_BACK) {
+                        // 手机摄像头有多个后置 获取第一个
+                        if (!backCameraId.isNullOrEmpty()) {
+                            continue
+                        }
                         backCameraCs = characteristics
                         backCameraId = cameraId
                     } else if (facing == CameraCharacteristics.LENS_FACING_FRONT) {
@@ -204,13 +210,9 @@ class Camera2Activity : AppCompatActivity() {
 
     private fun startPreview() {
         try {
-            val surfaceTexture = textureView.surfaceTexture
-            previewSize?.let {
-                surfaceTexture?.setDefaultBufferSize(it.width, it.height)
-
-                getCurrentCameraCcs()?.let { ccs ->
-                    textureView?.setAspectRatio(it.width, it.height, computeRelativeRotation(ccs))
-                }
+            var surfaceTexture: SurfaceTexture? = null
+            getCurrentCameraCcs()?.let { ccs ->
+                surfaceTexture = CameraUtils.buildTargetTexture(textureView, ccs, 0)
             }
             val previewSurface = Surface(surfaceTexture)
             // 创建预览请求 TEMPLATE_PREVIEW
