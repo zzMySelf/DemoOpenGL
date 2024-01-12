@@ -258,42 +258,6 @@ class Camera2Activity : AppCompatActivity() {
         }
     }
 
-    /**
-     * 获取当前设备屏幕的旋转角度
-     */
-    private fun getDeviceScreenRotation(context: Context): Int {
-        val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val display: Display? = windowManager.defaultDisplay
-
-        if (display != null) {
-            return when (display.rotation) {
-                Surface.ROTATION_0 -> 0
-                Surface.ROTATION_90 -> 90
-                Surface.ROTATION_180 -> 180
-                Surface.ROTATION_270 -> 270
-                else -> 0
-            }
-        }
-
-        return 0
-    }
-
-    private fun computeRelativeRotation(characteristics: CameraCharacteristics): Int {
-        val sensorOrientationDegrees =
-            characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: return 0
-        val surfaceRotationDegrees = getDeviceScreenRotation(this)
-
-        // Reverse device orientation for back-facing cameras.
-        val sign = if (characteristics.get(CameraCharacteristics.LENS_FACING) ==
-            CameraCharacteristics.LENS_FACING_FRONT
-        ) 1 else -1
-
-        // Calculate desired orientation relative to camera orientation to make
-        // the image upright relative to the device orientation.
-        return (sensorOrientationDegrees - surfaceRotationDegrees * sign + 360) % 360
-    }
-
-
     private fun releaseCamera() {
         // 释放 Camera 相关资源
         captureSession?.close()

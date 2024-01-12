@@ -1,4 +1,3 @@
-
 package com.baidu.demoopengl.video
 
 import android.graphics.Matrix
@@ -12,16 +11,16 @@ object CameraUtils {
 
     /** Return the biggest preview size available which is smaller than the window */
     private fun findBestPreviewSize(windowSize: Size, characteristics: CameraCharacteristics):
-        Size {
-            val supportedPreviewSizes: List<Size> =
-                characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-                    ?.getOutputSizes(SurfaceTexture::class.java)
-                    ?.filter { SizeComparator.compare(it, windowSize) >= 0 }
-                    ?.sortedWith(SizeComparator)
-                    ?: emptyList()
+            Size {
+        val supportedPreviewSizes: List<Size> =
+            characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                ?.getOutputSizes(SurfaceTexture::class.java)
+                ?.filter { SizeComparator.compare(it, windowSize) >= 0 }
+                ?.sortedWith(SizeComparator)
+                ?: emptyList()
 
-            return supportedPreviewSizes.getOrElse(0) { Size(0, 0) }
-        }
+        return supportedPreviewSizes.getOrElse(0) { Size(0, 0) }
+    }
 
     /**
      * Computes the relative rotation between the sensor orientation and the display rotation
@@ -30,8 +29,7 @@ object CameraUtils {
         characteristics: CameraCharacteristics,
         deviceOrientationDegrees: Int
     ): Int {
-        val sensorOrientationDegrees =
-            characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
+        val sensorOrientationDegrees = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
 
         // Reverse device orientation for front-facing cameras
         val sign = if (characteristics.get(CameraCharacteristics.LENS_FACING) ==
@@ -53,10 +51,8 @@ object CameraUtils {
         val surfaceRotationDegrees = surfaceRotation * 90
         val windowSize = Size(containerView.width, containerView.height)
         val previewSize = findBestPreviewSize(windowSize, characteristics)
-        val sensorOrientation =
-            characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
-        val isRotationRequired =
-            computeRelativeRotation(characteristics, surfaceRotationDegrees) % 180 != 0
+        val sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION) ?: 0
+        val isRotationRequired = computeRelativeRotation(characteristics, surfaceRotationDegrees) % 180 != 0
 
         /* Scale factor required to scale the preview to its original size on the x-axis */
         var scaleX = 1f
@@ -64,33 +60,29 @@ object CameraUtils {
         var scaleY = 1f
 
         if (sensorOrientation == 0) {
-            scaleX =
-                if (!isRotationRequired) {
-                    windowSize.width.toFloat() / previewSize.height
-                } else {
-                    windowSize.width.toFloat() / previewSize.width
-                }
+            scaleX = if (!isRotationRequired) {
+                windowSize.width.toFloat() / previewSize.height
+            } else {
+                windowSize.width.toFloat() / previewSize.width
+            }
 
-            scaleY =
-                if (!isRotationRequired) {
-                    windowSize.height.toFloat() / previewSize.width
-                } else {
-                    windowSize.height.toFloat() / previewSize.height
-                }
+            scaleY = if (!isRotationRequired) {
+                windowSize.height.toFloat() / previewSize.width
+            } else {
+                windowSize.height.toFloat() / previewSize.height
+            }
         } else {
-            scaleX =
-                if (isRotationRequired) {
-                    windowSize.width.toFloat() / previewSize.height
-                } else {
-                    windowSize.width.toFloat() / previewSize.width
-                }
+            scaleX = if (isRotationRequired) {
+                windowSize.width.toFloat() / previewSize.height
+            } else {
+                windowSize.width.toFloat() / previewSize.width
+            }
 
-            scaleY =
-                if (isRotationRequired) {
-                    windowSize.height.toFloat() / previewSize.width
-                } else {
-                    windowSize.height.toFloat() / previewSize.height
-                }
+            scaleY = if (isRotationRequired) {
+                windowSize.height.toFloat() / previewSize.width
+            } else {
+                windowSize.height.toFloat() / previewSize.height
+            }
         }
 
         /* Scale factor required to fit the preview to the TextureView size */
