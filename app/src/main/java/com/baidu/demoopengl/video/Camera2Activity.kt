@@ -6,29 +6,21 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
-import android.media.ImageReader
-import android.media.MediaCodec
-import android.media.MediaFormat
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.util.Log
 import android.util.Size
-import android.view.Display
 import android.view.Surface
 import android.view.TextureView
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.baidu.demoopengl.AutoRatioTextureView
 import com.baidu.demoopengl.R
-import java.io.File
-import java.io.IOException
+import java.nio.ByteBuffer
 
 class Camera2Activity : AppCompatActivity() {
     companion object {
@@ -68,6 +60,83 @@ class Camera2Activity : AppCompatActivity() {
 
     private val isFrontCamera = MutableLiveData<Boolean>()
 
+    private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+        override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
+            Log.w(TAG, "=====> onSurfaceTextureAvailable width:$width height:$height")
+            startPreview()
+        }
+
+        override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
+            Log.w(TAG, "=====> onSurfaceTextureSizeChanged width:$width height:$height")
+        }
+
+        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
+            Log.w(TAG, "=====> onSurfaceTextureDestroyed")
+            return true
+        }
+
+        override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
+        }
+    }
+
+    private val captureCallback = object : CameraCaptureSession.CaptureCallback() {
+        override fun onCaptureStarted(session: CameraCaptureSession, request: CaptureRequest, timestamp: Long, frameNumber: Long) {
+            super.onCaptureStarted(session, request, timestamp, frameNumber)
+            Log.w(TAG, "=====> onCaptureStarted timestamp:$timestamp frameNumber:$frameNumber")
+        }
+
+        override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult) {
+            super.onCaptureProgressed(session, request, partialResult)
+            Log.w(TAG, "=====> onCaptureProgressed ")
+        }
+
+        override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
+            super.onCaptureCompleted(session, request, result)
+            Log.w(TAG, "=====> onCaptureCompleted ")
+//            val inputBufferIndex = MediaCodecHelper.dequeueInputBuffer(10000) ?: return
+//            if (inputBufferIndex > 0) {
+//                val inputBuffer = MediaCodecHelper.getInputBuffer(inputBufferIndex) ?: return
+//                val jpegData = getJpegData(result)
+//                inputBuffer.put(jpegData)
+//                MediaCodecHelper.queueInputBuffer(inputBufferIndex, 0, jpegData.size, )
+//
+//            }
+
+        }
+
+        override fun onCaptureFailed(session: CameraCaptureSession, request: CaptureRequest, failure: CaptureFailure) {
+            super.onCaptureFailed(session, request, failure)
+            Log.w(TAG, "=====> onCaptureFailed ")
+        }
+
+        override fun onCaptureSequenceCompleted(session: CameraCaptureSession, sequenceId: Int, frameNumber: Long) {
+            super.onCaptureSequenceCompleted(session, sequenceId, frameNumber)
+            Log.w(TAG, "=====> onCaptureSequenceCompleted sequenceId:$sequenceId frameNumber:$frameNumber")
+        }
+
+        override fun onCaptureSequenceAborted(session: CameraCaptureSession, sequenceId: Int) {
+            super.onCaptureSequenceAborted(session, sequenceId)
+            Log.w(TAG, "=====> onCaptureSequenceAborted sequenceId:$sequenceId ")
+        }
+
+        override fun onCaptureBufferLost(session: CameraCaptureSession, request: CaptureRequest, target: Surface, frameNumber: Long) {
+            super.onCaptureBufferLost(session, request, target, frameNumber)
+            Log.w(TAG, "=====> onCaptureBufferLost frameNumber:$frameNumber ")
+        }
+    }
+
+    // 获取相机捕获的 JPEG 数据的示例方法
+    private fun getJpegData(result: TotalCaptureResult): ByteArray {
+        // 假设 JPEG 数据存储在 CaptureResult.JPEG_DATA 中
+        val jpegBuffer = ByteBuffer.allocate(0)
+
+        // 将 JPEG 数据复制到字节数组中
+        val jpegData = ByteArray(jpegBuffer.remaining())
+        jpegBuffer.get(jpegData)
+
+        return jpegData
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera2)
@@ -87,9 +156,12 @@ class Camera2Activity : AppCompatActivity() {
         }
 
         initObserver()
+
+        MediaCodecHelper.createMediaCodec()
     }
 
     private fun initObserver() {
+        // 切换摄像头
         isFrontCamera.observe(this) {
             if (it) {
                 switchBtn.text = "switch front"
@@ -102,24 +174,9 @@ class Camera2Activity : AppCompatActivity() {
     }
 
     private fun initView() {
-        textureView.surfaceTextureListener = object : TextureView.SurfaceTextureListener {
-            override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
-                Log.w(TAG, "=====> onSurfaceTextureAvailable width:$width height:$height")
-                startPreview()
-            }
-
-            override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture, width: Int, height: Int) {
-                Log.w(TAG, "=====> onSurfaceTextureSizeChanged width:$width height:$height")
-            }
-
-            override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
-                Log.w(TAG, "=====> onSurfaceTextureDestroyed")
-                return true
-            }
-
-            override fun onSurfaceTextureUpdated(surface: SurfaceTexture) {
-            }
-        }
+        // 设置
+        textureView.surfaceTextureListener = surfaceTextureListener
+        // 切换摄像头
         switchBtn.setOnClickListener {
             releaseCamera()
             val value = isFrontCamera.value ?: false
@@ -129,9 +186,11 @@ class Camera2Activity : AppCompatActivity() {
 
     private fun initCamera() {
         cameraManager = getSystemService(Context.CAMERA_SERVICE) as? CameraManager
-        val backgroundThread = HandlerThread("mine-camera2")
-        backgroundThread.start()
-        backgroundHandler = Handler(backgroundThread.looper)
+        if (backgroundHandler == null) {
+            val backgroundThread = HandlerThread("mine-camera2")
+            backgroundThread.start()
+            backgroundHandler = Handler(backgroundThread.looper)
+        }
     }
 
     private fun openCamera(isPreview: Boolean = false) {
@@ -219,14 +278,21 @@ class Camera2Activity : AppCompatActivity() {
             val captureRequest = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
             captureRequest?.addTarget(previewSurface)
 
-            cameraDevice?.createCaptureSession(listOf(previewSurface), object : CameraCaptureSession.StateCallback() {
+            val surfaceList = mutableListOf<Surface >().apply {
+                add(previewSurface)
+                MediaCodecHelper.getSurface()?.let {
+                    add(it)
+                }
+            }
+
+            cameraDevice?.createCaptureSession(surfaceList, object : CameraCaptureSession.StateCallback() {
                 override fun onConfigured(session: CameraCaptureSession) {
                     captureSession = session
                     try {
 //                        previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
                         val captureRequest = captureRequest?.build()
                         if (captureRequest != null) {
-                            session.setRepeatingRequest(captureRequest, null, backgroundHandler)
+                            session.setRepeatingRequest(captureRequest, captureCallback, backgroundHandler)
                         }
                     } catch (e: CameraAccessException) {
                         e.printStackTrace()
@@ -236,7 +302,9 @@ class Camera2Activity : AppCompatActivity() {
                 override fun onConfigureFailed(session: CameraCaptureSession) {
                     Toast.makeText(this@Camera2Activity, "Failed to configure camera preview", Toast.LENGTH_SHORT).show()
                 }
+
             }, backgroundHandler)
+            MediaCodecHelper.startEncoder()
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
