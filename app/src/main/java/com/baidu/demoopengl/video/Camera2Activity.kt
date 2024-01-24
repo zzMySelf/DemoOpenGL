@@ -251,9 +251,10 @@ class Camera2Activity : AppCompatActivity() {
             getCurrentCameraCcs()?.let { ccs ->
                 surfaceTexture = CameraUtils.buildTargetTexture(textureView, ccs, 0)
             }
-            val previewSurface = Surface(surfaceTexture)
+
             // 创建预览请求 TEMPLATE_PREVIEW
             val captureRequest = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
+            val previewSurface = Surface(surfaceTexture)
             captureRequest?.addTarget(previewSurface)
             MediaCodecHelper.getSurface()?.let {
                 captureRequest?.addTarget(it)

@@ -26,6 +26,7 @@ object MediaCodecHelper  {
     private const val HEIGHT = 1080
     private const val FRAME_RATE = 30
     private const val I_FRAME_INTERVAL = 5
+    private const val BIT_RATE = 6000000
 
     private var mediaCodec: MediaCodec? = null
     private var surface: Surface? = null
@@ -35,7 +36,7 @@ object MediaCodecHelper  {
     fun createMediaCodec() {
         mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
         val mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, WIDTH, HEIGHT).apply {
-            setInteger(MediaFormat.KEY_BIT_RATE, 6000000)
+            setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE)
             setInteger(MediaFormat.KEY_FRAME_RATE, FRAME_RATE)
             setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, I_FRAME_INTERVAL)
@@ -47,20 +48,7 @@ object MediaCodecHelper  {
             e.printStackTrace()
         }
         surface = mediaCodec?.createInputSurface()
-//        mediaCodec?.setCallback(this)
-
         initEncoderThread()
-    }
-
-    private fun initEncoderThread() {
-        mediaCodec?.let {
-            val filePath = "/storage/emulated/0/Android/data/com.baidu.demoopengl/files/encoded.mp4"
-            val file = File(filePath)
-            if (!file.exists()) {
-                file.createNewFile()
-            }
-            encoderThread = EncoderThread(it, file, 90)
-        }
     }
 
     fun getSurface() = surface
@@ -85,6 +73,17 @@ object MediaCodecHelper  {
         encoderThread = null
     }
 
+    private fun initEncoderThread() {
+        mediaCodec?.let {
+            val filePath = "/storage/emulated/0/Android/data/com.baidu.demoopengl/files/encoded.mp4"
+            val file = File(filePath)
+            if (!file.exists()) {
+                file.createNewFile()
+            }
+            encoderThread = EncoderThread(it, file, 90)
+        }
+    }
+
     class EncoderThread(
         private val mediaCodec: MediaCodec,
         private val outputFile: File,
@@ -94,16 +93,15 @@ object MediaCodecHelper  {
             private const val TIMEOUT_USEC: Long = 10 * 1000
         }
 
-        var encoderFormat: MediaFormat? = null
         private val bufferInfo by lazy { MediaCodec.BufferInfo() }
         private val muxer by lazy { MediaMuxer(outputFile.path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
-
-        var videoTrack: Int = -1
-
-        var hander: EncoderHandler? = null
-        var frameNum: Int = 0
-
         private val _lock by lazy { Object() }
+
+        private var hander: EncoderHandler? = null
+        private var encoderFormat: MediaFormat? = null
+        private var videoTrack: Int = -1
+        private var frameNum: Int = 0
+
 
         @Volatile
         var isReady: Boolean = false
@@ -152,7 +150,7 @@ object MediaCodecHelper  {
             Log.d(TAG, "Waited for first frame");
         }
 
-        fun getHandler(): EncoderHandler? {
+        private fun getHandler(): EncoderHandler? {
             synchronized(_lock) {
                 // Confirm ready state.
                 if (!isReady) {
