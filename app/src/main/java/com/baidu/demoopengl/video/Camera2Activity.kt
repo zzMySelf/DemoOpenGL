@@ -85,11 +85,6 @@ class Camera2Activity : AppCompatActivity() {
             Log.w(TAG, "=====> onCaptureStarted timestamp:$timestamp frameNumber:$frameNumber")
         }
 
-        override fun onCaptureProgressed(session: CameraCaptureSession, request: CaptureRequest, partialResult: CaptureResult) {
-            super.onCaptureProgressed(session, request, partialResult)
-            Log.w(TAG, "=====> onCaptureProgressed ")
-        }
-
         override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
             super.onCaptureCompleted(session, request, result)
             Log.w(TAG, "=====> onCaptureCompleted ")
@@ -101,27 +96,8 @@ class Camera2Activity : AppCompatActivity() {
 //                MediaCodecHelper.queueInputBuffer(inputBufferIndex, 0, jpegData.size, )
 //
 //            }
+            MediaCodecHelper.frameAvailable()
 
-        }
-
-        override fun onCaptureFailed(session: CameraCaptureSession, request: CaptureRequest, failure: CaptureFailure) {
-            super.onCaptureFailed(session, request, failure)
-            Log.w(TAG, "=====> onCaptureFailed ")
-        }
-
-        override fun onCaptureSequenceCompleted(session: CameraCaptureSession, sequenceId: Int, frameNumber: Long) {
-            super.onCaptureSequenceCompleted(session, sequenceId, frameNumber)
-            Log.w(TAG, "=====> onCaptureSequenceCompleted sequenceId:$sequenceId frameNumber:$frameNumber")
-        }
-
-        override fun onCaptureSequenceAborted(session: CameraCaptureSession, sequenceId: Int) {
-            super.onCaptureSequenceAborted(session, sequenceId)
-            Log.w(TAG, "=====> onCaptureSequenceAborted sequenceId:$sequenceId ")
-        }
-
-        override fun onCaptureBufferLost(session: CameraCaptureSession, request: CaptureRequest, target: Surface, frameNumber: Long) {
-            super.onCaptureBufferLost(session, request, target, frameNumber)
-            Log.w(TAG, "=====> onCaptureBufferLost frameNumber:$frameNumber ")
         }
     }
 
@@ -141,13 +117,15 @@ class Camera2Activity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera2)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-            ) != PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+            || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                this, arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_CAMERA_PERMISSION
+                this,
+                arrayOf(Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE), REQUEST_CAMERA_PERMISSION
             )
         } else {
             initView()
@@ -275,9 +253,11 @@ class Camera2Activity : AppCompatActivity() {
             }
             val previewSurface = Surface(surfaceTexture)
             // 创建预览请求 TEMPLATE_PREVIEW
-            val captureRequest = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW)
+            val captureRequest = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
             captureRequest?.addTarget(previewSurface)
-
+            MediaCodecHelper.getSurface()?.let {
+                captureRequest?.addTarget(it)
+            }
             val surfaceList = mutableListOf<Surface >().apply {
                 add(previewSurface)
                 MediaCodecHelper.getSurface()?.let {
@@ -290,9 +270,10 @@ class Camera2Activity : AppCompatActivity() {
                     captureSession = session
                     try {
 //                        previewRequestBuilder?.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE)
-                        val captureRequest = captureRequest?.build()
-                        if (captureRequest != null) {
-                            session.setRepeatingRequest(captureRequest, captureCallback, backgroundHandler)
+                        val request = captureRequest?.build()
+                        if (request != null) {
+                            session.setRepeatingRequest(request, captureCallback, backgroundHandler)
+                            MediaCodecHelper.startEncoder()
                         }
                     } catch (e: CameraAccessException) {
                         e.printStackTrace()
@@ -304,7 +285,6 @@ class Camera2Activity : AppCompatActivity() {
                 }
 
             }, backgroundHandler)
-            MediaCodecHelper.startEncoder()
         } catch (e: CameraAccessException) {
             e.printStackTrace()
         }
@@ -328,8 +308,11 @@ class Camera2Activity : AppCompatActivity() {
 
     private fun releaseCamera() {
         // 释放 Camera 相关资源
+        captureSession?.stopRepeating()
         captureSession?.close()
         cameraDevice?.close()
+
+        MediaCodecHelper.stop()
     }
 
     override fun onDestroy() {
