@@ -4,7 +4,6 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.MediaMuxer
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -13,27 +12,31 @@ import android.view.Surface
 import java.io.File
 import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
-import java.util.Base64.Encoder
 
 /**
  * Day：2024/1/12 16:41
  * @author zhangyelei
  */
-object MediaCodecHelper  {
-    private const val TAG = "MediaCodecHelper"
+class MediaCodecSession  {
 
-    private const val WIDTH = 1920
-    private const val HEIGHT = 1080
-    private const val FRAME_RATE = 30
-    private const val I_FRAME_INTERVAL = 5
-    private const val BIT_RATE = 6000000
+    companion object {
+        private const val TAG = "MediaCodecHelper"
+
+        private const val WIDTH = 1920
+        private const val HEIGHT = 1080
+        private const val FRAME_RATE = 30
+        private const val I_FRAME_INTERVAL = 5
+        private const val BIT_RATE = 6000000
+
+        private const val TIMEOUT_USEC: Long = 10 * 1000
+    }
 
     private var mediaCodec: MediaCodec? = null
     private var surface: Surface? = null
 
     private var encoderThread: EncoderThread? = null
 
-    fun createMediaCodec() {
+    fun initMediaCodec() {
         mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
         val mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, WIDTH, HEIGHT).apply {
             setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE)
@@ -84,20 +87,17 @@ object MediaCodecHelper  {
         }
     }
 
-    class EncoderThread(
+    inner class EncoderThread(
         private val mediaCodec: MediaCodec,
         private val outputFile: File,
         private val orientationHint: Int
     ) : Thread() {
-        companion object {
-            private const val TIMEOUT_USEC: Long = 10 * 1000
-        }
 
         private val bufferInfo by lazy { MediaCodec.BufferInfo() }
         private val muxer by lazy { MediaMuxer(outputFile.path, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4) }
         private val _lock by lazy { Object() }
 
-        private var hander: EncoderHandler? = null
+        private var handler: EncoderHandler? = null
         private var encoderFormat: MediaFormat? = null
         private var videoTrack: Int = -1
         private var frameNum: Int = 0
@@ -109,7 +109,7 @@ object MediaCodecHelper  {
         override fun run() {
             super.run()
             Looper.prepare()
-            hander = EncoderHandler(this)
+            handler = EncoderHandler(this)
             Log.d(TAG, "encoder thread ready")
 
             synchronized(_lock) {
@@ -121,7 +121,7 @@ object MediaCodecHelper  {
 
             synchronized(_lock) {
                 isReady = false
-                hander = null    // signal waitUntilReady()
+                handler = null    // signal waitUntilReady()
             }
             Log.d(TAG, "looper quit")
         }
@@ -157,7 +157,7 @@ object MediaCodecHelper  {
                     throw RuntimeException("not ready")
                 }
             }
-            return hander
+            return handler
         }
 
         fun frameAvailable() {
@@ -255,8 +255,8 @@ object MediaCodecHelper  {
 
     class EncoderHandler(et: EncoderThread) : Handler() {
         companion object {
-            val MSG_FRAME_AVAILABLE: Int = 0
-            val MSG_SHUTDOWN: Int = 1
+            const val MSG_FRAME_AVAILABLE: Int = 0
+            const val MSG_SHUTDOWN: Int = 1
         }
 
         private val mWeakEncoderThread = WeakReference(et)

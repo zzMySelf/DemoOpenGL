@@ -60,6 +60,8 @@ class Camera2Activity : AppCompatActivity() {
 
     private val isFrontCamera = MutableLiveData<Boolean>()
 
+    private val mediaCodecSession by lazy { MediaCodecSession() }
+
     private val surfaceTextureListener = object : TextureView.SurfaceTextureListener {
         override fun onSurfaceTextureAvailable(surface: SurfaceTexture, width: Int, height: Int) {
             Log.w(TAG, "=====> onSurfaceTextureAvailable width:$width height:$height")
@@ -88,15 +90,15 @@ class Camera2Activity : AppCompatActivity() {
         override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
             super.onCaptureCompleted(session, request, result)
             Log.w(TAG, "=====> onCaptureCompleted ")
-//            val inputBufferIndex = MediaCodecHelper.dequeueInputBuffer(10000) ?: return
+//            val inputBufferIndex = mediaCodecSession.dequeueInputBuffer(10000) ?: return
 //            if (inputBufferIndex > 0) {
-//                val inputBuffer = MediaCodecHelper.getInputBuffer(inputBufferIndex) ?: return
+//                val inputBuffer = mediaCodecSession.getInputBuffer(inputBufferIndex) ?: return
 //                val jpegData = getJpegData(result)
 //                inputBuffer.put(jpegData)
-//                MediaCodecHelper.queueInputBuffer(inputBufferIndex, 0, jpegData.size, )
+//                mediaCodecSession.queueInputBuffer(inputBufferIndex, 0, jpegData.size, )
 //
 //            }
-            MediaCodecHelper.frameAvailable()
+            mediaCodecSession.frameAvailable()
 
         }
     }
@@ -135,7 +137,7 @@ class Camera2Activity : AppCompatActivity() {
 
         initObserver()
 
-        MediaCodecHelper.createMediaCodec()
+        mediaCodecSession.initMediaCodec()
     }
 
     private fun initObserver() {
@@ -256,12 +258,12 @@ class Camera2Activity : AppCompatActivity() {
             val captureRequest = cameraDevice?.createCaptureRequest(CameraDevice.TEMPLATE_RECORD)
             val previewSurface = Surface(surfaceTexture)
             captureRequest?.addTarget(previewSurface)
-            MediaCodecHelper.getSurface()?.let {
+            mediaCodecSession.getSurface()?.let {
                 captureRequest?.addTarget(it)
             }
             val surfaceList = mutableListOf<Surface >().apply {
                 add(previewSurface)
-                MediaCodecHelper.getSurface()?.let {
+                mediaCodecSession.getSurface()?.let {
                     add(it)
                 }
             }
@@ -274,7 +276,7 @@ class Camera2Activity : AppCompatActivity() {
                         val request = captureRequest?.build()
                         if (request != null) {
                             session.setRepeatingRequest(request, captureCallback, backgroundHandler)
-                            MediaCodecHelper.startEncoder()
+                            mediaCodecSession.startEncoder()
                         }
                     } catch (e: CameraAccessException) {
                         e.printStackTrace()
@@ -313,7 +315,7 @@ class Camera2Activity : AppCompatActivity() {
         captureSession?.close()
         cameraDevice?.close()
 
-        MediaCodecHelper.stop()
+        mediaCodecSession.stop()
     }
 
     override fun onDestroy() {
