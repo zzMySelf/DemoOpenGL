@@ -1,12 +1,18 @@
 package com.baidu.demoopengl.opengl
 
+import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.TextView
 import com.baidu.demoopengl.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-
+    companion object {
+        fun start(context: Context) {
+            val intent = Intent(context, MainActivity::class.java)
+            context.startActivity(intent)
+        }
+    }
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,11 +30,4 @@ class MainActivity : AppCompatActivity() {
      * which is packaged with this application.
      */
     external fun stringFromJNI(): String
-
-    companion object {
-        // Used to load the 'demoopengl' library on application startup.
-        init {
-            System.loadLibrary("demoopengl")
-        }
-    }
 }
