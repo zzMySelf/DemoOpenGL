@@ -1,5 +1,6 @@
 package com.baidu.demoopengl.video
 
+import android.content.Context
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
@@ -29,6 +30,10 @@ class MediaCodecSession  {
         private const val BIT_RATE = 6000000
 
         private const val TIMEOUT_USEC: Long = 10 * 1000
+
+        private const val RECORD_STATE_NONE = 0
+        private const val RECORD_STATE_RECORDING = 1
+        private const val RECORD_STATE_STOP = 2
     }
 
     private var mediaCodec: MediaCodec? = null
@@ -36,7 +41,16 @@ class MediaCodecSession  {
 
     private var encoderThread: EncoderThread? = null
 
-    fun initMediaCodec() {
+    @Volatile
+    private var _state = RECORD_STATE_NONE
+    val recordState: Int
+        get() = _state
+
+    private fun setState(s: Int) {
+        _state = s
+    }
+
+    fun initMediaCodec(context: Context) {
         mediaCodec = MediaCodec.createEncoderByType(MediaFormat.MIMETYPE_VIDEO_AVC)
         val mediaFormat = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, WIDTH, HEIGHT).apply {
             setInteger(MediaFormat.KEY_BIT_RATE, BIT_RATE)
@@ -51,7 +65,7 @@ class MediaCodecSession  {
             e.printStackTrace()
         }
         surface = mediaCodec?.createInputSurface()
-        initEncoderThread()
+        initEncoderThread(context)
     }
 
     fun getSurface() = surface
@@ -60,6 +74,7 @@ class MediaCodecSession  {
         mediaCodec?.start()
         encoderThread?.start()
         encoderThread?.waitUntilReady()
+        setState(RECORD_STATE_RECORDING)
     }
 
     fun frameAvailable() {
@@ -67,6 +82,7 @@ class MediaCodecSession  {
     }
 
     fun stop() {
+        setState(RECORD_STATE_STOP)
         mediaCodec?.stop()
         mediaCodec?.release()
         mediaCodec = null
@@ -74,11 +90,12 @@ class MediaCodecSession  {
 
         encoderThread?.shutdown()
         encoderThread = null
+        setState(RECORD_STATE_NONE)
     }
 
-    private fun initEncoderThread() {
+    private fun initEncoderThread(context: Context) {
         mediaCodec?.let {
-            val filePath = "/storage/emulated/0/Android/data/com.baidu.demoopengl/files/encoded.mp4"
+            val filePath = "${context.getExternalFilesDir(null)}/encoded.mp4"
             val file = File(filePath)
             if (!file.exists()) {
                 file.createNewFile()
@@ -191,6 +208,9 @@ class MediaCodecSession  {
             var encodedFrame = false
 
             while (true) {
+                if (recordState != RECORD_STATE_RECORDING) {
+                    break
+                }
                 val encoderStatus = mediaCodec.dequeueOutputBuffer(bufferInfo, TIMEOUT_USEC)
                 Log.d(TAG, "encoder encoderStatus: $encoderStatus  ")
                 when {

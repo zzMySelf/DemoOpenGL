@@ -90,16 +90,7 @@ class Camera2Activity : AppCompatActivity() {
         override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
             super.onCaptureCompleted(session, request, result)
             Log.w(TAG, "=====> onCaptureCompleted ")
-//            val inputBufferIndex = mediaCodecSession.dequeueInputBuffer(10000) ?: return
-//            if (inputBufferIndex > 0) {
-//                val inputBuffer = mediaCodecSession.getInputBuffer(inputBufferIndex) ?: return
-//                val jpegData = getJpegData(result)
-//                inputBuffer.put(jpegData)
-//                mediaCodecSession.queueInputBuffer(inputBufferIndex, 0, jpegData.size, )
-//
-//            }
             mediaCodecSession.frameAvailable()
-
         }
     }
 
@@ -133,11 +124,10 @@ class Camera2Activity : AppCompatActivity() {
             initView()
             initCamera()
             openCamera()
+            initObserver()
+
+            mediaCodecSession.initMediaCodec(this)
         }
-
-        initObserver()
-
-        mediaCodecSession.initMediaCodec()
     }
 
     private fun initObserver() {
@@ -162,6 +152,9 @@ class Camera2Activity : AppCompatActivity() {
             val value = isFrontCamera.value ?: false
             isFrontCamera.value = !value
         }
+//        recordBtn.setOnClickListener{
+//            mediaCodecSession.startEncoder()
+//        }
     }
 
     private fun initCamera() {
