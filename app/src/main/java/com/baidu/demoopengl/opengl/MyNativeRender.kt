@@ -14,7 +14,7 @@ class MyNativeRender {
 
     external fun native_OnUnInit()
 
-    external fun native_SetImageData(format: Int, width: Int, height: Int, bytes: ByteArray?)
+    external fun native_SetImageData(format: Int, width: Int, height: Int, imageData: ByteArray?)
 
     external fun native_OnSurfaceCreated()
 

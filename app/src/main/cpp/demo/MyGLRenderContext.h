@@ -5,20 +5,32 @@
 #ifndef DEMOOPENGL_MYGLRENDERCONTEXT_H
 #define DEMOOPENGL_MYGLRENDERCONTEXT_H
 
+#include <cstdint>
 
 class MyGLRenderContext {
 public:
 
-    MyGLRenderContext();
+    static MyGLRenderContext* getInstance();
+
+    static MyGLRenderContext* destroyInstance();
 
     ~MyGLRenderContext();
 
     void printLog();
 
+    void setImageData(int format, int width, int height, uint8_t *pData);
+
+    void onSurfaceCreated();
+
+    void onSurfaceChanged(int width, int height);
+
+    void onDrawFrame();
+
 private:
 
-    void setImageData(int format);
+    MyGLRenderContext();
 
+    static MyGLRenderContext* m_pContext;
 };
 
 
