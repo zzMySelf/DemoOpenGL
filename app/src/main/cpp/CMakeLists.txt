@@ -16,8 +16,11 @@ project("demoopengl")
 
 include_directories(
         demo
+        demo/glm
 )
-file(GLOB CPP_SOURCES demo/*.cpp)
+file(GLOB CPP_SOURCES
+        demo/*.cpp
+        )
 
 add_library( # Sets the name of the library.
         demoopengl
@@ -55,5 +58,7 @@ target_link_libraries( # Specifies the target library.
         # included in the NDK.
         ${log-lib}
 
+        EGL
         GLESv3
+        android
         )
