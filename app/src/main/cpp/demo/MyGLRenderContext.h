@@ -6,6 +6,8 @@
 #define DEMOOPENGL_MYGLRENDERCONTEXT_H
 
 #include <cstdint>
+#include <GLES3/gl3.h>
+#include <TriangleSample.h>
 
 class MyGLRenderContext {
 public:
@@ -15,8 +17,6 @@ public:
     static MyGLRenderContext* destroyInstance();
 
     ~MyGLRenderContext();
-
-    void printLog();
 
     void setImageData(int format, int width, int height, uint8_t *pData);
 
@@ -31,6 +31,8 @@ private:
     MyGLRenderContext();
 
     static MyGLRenderContext* m_pContext;
+
+    TriangleSample* m_Sample;
 };
 
 

@@ -20,6 +20,7 @@ include_directories(
 )
 file(GLOB CPP_SOURCES
         demo/*.cpp
+        demo/util/*.cpp
         )
 
 add_library( # Sets the name of the library.

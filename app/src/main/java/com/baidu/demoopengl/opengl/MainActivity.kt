@@ -2,9 +2,10 @@ package com.baidu.demoopengl.opengl
 
 import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.baidu.demoopengl.databinding.ActivityMainBinding
+import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.baidu.demoopengl.R
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -13,16 +14,17 @@ class MainActivity : AppCompatActivity() {
             context.startActivity(intent)
         }
     }
-    private lateinit var binding: ActivityMainBinding
+
+    private var rootContainer: ConstraintLayout? = null
+    private val glSurfaceView by lazy {
+        MyGLSurfaceView(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // Example of a call to a native method
-        binding.sampleText.text = stringFromJNI()
+        setContentView(R.layout.activity_main)
+        rootContainer = findViewById(R.id.rootContainer)
+        rootContainer?.addView(glSurfaceView)
     }
 
     /**
