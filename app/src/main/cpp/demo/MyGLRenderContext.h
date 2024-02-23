@@ -7,7 +7,8 @@
 
 #include <cstdint>
 #include <GLES3/gl3.h>
-#include <TriangleSample.h>
+#include "sample/TriangleSample.h"
+#include "sample/TextureMapSample.h"
 
 class MyGLRenderContext {
 public:
@@ -32,7 +33,10 @@ private:
 
     static MyGLRenderContext* m_pContext;
 
-    TriangleSample* m_Sample;
+//    TriangleSample* m_Sample;
+    TextureMapSample* m_Sample;
+    int m_ScreenW;
+    int m_ScreenH;
 };
 
 

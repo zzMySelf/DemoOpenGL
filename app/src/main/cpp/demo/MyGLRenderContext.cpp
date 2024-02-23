@@ -9,7 +9,8 @@
 MyGLRenderContext* MyGLRenderContext::m_pContext = nullptr;
 
 MyGLRenderContext::MyGLRenderContext() {
-    m_Sample = new TriangleSample();
+//    m_Sample = new TriangleSample();
+    m_Sample = new TextureMapSample();
 }
 
 MyGLRenderContext::~MyGLRenderContext() {
@@ -36,18 +37,22 @@ void MyGLRenderContext::setImageData(int format, int width, int height, uint8_t 
             break;
 
     }
-
+    if (m_Sample) {
+        m_Sample->loadImage(&nativeImage);
+    }
 }
 
 void MyGLRenderContext::onDrawFrame() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     if (m_Sample) {
-        m_Sample->draw();
+        m_Sample->draw(m_ScreenW, m_ScreenH);
     }
 }
 
 void MyGLRenderContext::onSurfaceChanged(int width, int height) {
     glViewport(0, 0, width, height);
+    m_ScreenW = width;
+    m_ScreenH = height;
 }
 
 void MyGLRenderContext::onSurfaceCreated() {
