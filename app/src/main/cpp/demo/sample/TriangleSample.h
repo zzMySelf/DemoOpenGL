@@ -22,6 +22,10 @@ private:
     GLuint m_VertexShader;
     GLuint m_FragmentShader;
     GLuint m_ProgramObj;
+
+    unsigned int VAO;
+    unsigned int vbo0;
+    unsigned int vbo1;
 };
 
 
