@@ -31,9 +31,9 @@ GLfloat  vertices0[] = {
         0.5f, -0.5f, 0.0f,
 };
 GLfloat  vertices1[] = {
-        0.0f,  -1.0f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
+        -1.0f,  1.0f, 0.0f,
+        -1.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 0.0f,
 };
 
 TriangleSample::TriangleSample() {
@@ -81,14 +81,14 @@ void TriangleSample::init() {
     /**
      * 创建一个VAO
      */
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    glGenVertexArrays(1, &VAO0);
+    glGenVertexArrays(1, &VAO1);
 
+    glBindVertexArray(VAO0);
     /**
      * 创建VBO
      */
     glGenBuffers(1, &vbo0);
-    glGenBuffers(1, &vbo1);
 
     // 顶点缓冲对象的缓冲类型是GL_ARRAY_BUFFER
     glBindBuffer(GL_ARRAY_BUFFER, vbo0);
@@ -96,10 +96,12 @@ void TriangleSample::init() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)nullptr);
     glEnableVertexAttribArray(0);
 
-//    glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
-//    glEnableVertexAttribArray(0);
+    glBindVertexArray(VAO1);
+    glGenBuffers(1, &vbo1);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo1);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
+    glEnableVertexAttribArray(0);
 }
 
 void TriangleSample::draw() {
@@ -109,12 +111,11 @@ void TriangleSample::draw() {
     }
     glUseProgram(m_ProgramObj);
 
-    glBindVertexArray(VAO);
+    glBindVertexArray(VAO0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    glBindVertexArray(VAO1);
     glDrawArrays(GL_TRIANGLES, 0, 3);
-    glDrawArrays(GL_TRIANGLES, 3, 3);
-
-
-
 
 
 

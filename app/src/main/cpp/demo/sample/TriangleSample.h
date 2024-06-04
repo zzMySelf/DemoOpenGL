@@ -23,7 +23,8 @@ private:
     GLuint m_FragmentShader;
     GLuint m_ProgramObj;
 
-    unsigned int VAO;
+    unsigned int VAO0;
+    unsigned int VAO1;
     unsigned int vbo0;
     unsigned int vbo1;
 };
