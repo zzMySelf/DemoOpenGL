@@ -25,6 +25,10 @@ GLfloat  vertices0[] = {
         0.0f,  1.0f, 0.0f,
         -0.5f, -0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
+        // 第二个
+        0.0f,  -1.0f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
 };
 GLfloat  vertices1[] = {
         0.0f,  -1.0f, 0.0f,
@@ -107,6 +111,7 @@ void TriangleSample::draw() {
 
     glBindVertexArray(VAO);
     glDrawArrays(GL_TRIANGLES, 0, 3);
+    glDrawArrays(GL_TRIANGLES, 3, 3);
 
 
 
