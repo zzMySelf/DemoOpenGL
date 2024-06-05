@@ -6,23 +6,22 @@
 #define DEMOOPENGL_TRIANGLESAMPLE_H
 
 #include "util/GLUtils.h"
+#include "GLSampleBase.h"
 
 
-class TriangleSample {
+class TriangleSample : public GLSampleBase{
 public:
     TriangleSample();
 
     ~TriangleSample();
 
-    void init();
+    virtual void init();
 
-    void draw();
+    virtual void draw(int screenW, int screenH);
+
+    virtual void destroy();
 
 private:
-    GLuint m_VertexShader;
-    GLuint m_FragmentShader;
-    GLuint m_ProgramObj;
-
     unsigned int VAO0;
     unsigned int VAO1;
     unsigned int vbo0;

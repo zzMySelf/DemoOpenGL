@@ -9,12 +9,21 @@
 MyGLRenderContext* MyGLRenderContext::m_pContext = nullptr;
 
 MyGLRenderContext::MyGLRenderContext() {
-//    m_Sample = new TriangleSample();
-    m_Sample = new TextureMapSample();
 }
 
 MyGLRenderContext::~MyGLRenderContext() {
+    if (m_Sample) {
+        m_Sample->destroy();
+        m_Sample = nullptr;
+    }
+}
 
+void MyGLRenderContext::setRenderType(int paramType) {
+    if (paramType == SAMPLE_TYPE_KEY_TRIANGLE) {
+        m_Sample = new TriangleSample();
+    } else if (paramType == SAMPLE_TYPE_KEY_TEXTURE_MAP) {
+        m_Sample = new TextureMapSample();
+    }
 }
 
 void MyGLRenderContext::setImageData(int format, int width, int height, uint8_t *pData) {
@@ -57,7 +66,7 @@ void MyGLRenderContext::onSurfaceChanged(int width, int height) {
 
 void MyGLRenderContext::onSurfaceCreated() {
     glClearColor(1.0f,1.0f,1.0f, 1.0f);
-    if (m_Sample) {
+    if (m_Sample != nullptr) {
         m_Sample->init();
     }
 }

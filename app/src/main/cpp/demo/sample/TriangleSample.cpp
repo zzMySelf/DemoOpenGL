@@ -104,7 +104,7 @@ void TriangleSample::init() {
     glEnableVertexAttribArray(0);
 }
 
-void TriangleSample::draw() {
+void TriangleSample::draw(int screenW, int screenH) {
     // 如果为 0，表示没有有效的 OpenGL 着色器程序对象
     if (m_ProgramObj == 0) {
         return;
@@ -127,4 +127,17 @@ void TriangleSample::draw() {
 //    glBindBuffer(GL_ARRAY_BUFFER, vbo1);
 //    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
 //    glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void TriangleSample::destroy() {
+    if (m_ProgramObj) {
+        glDeleteProgram(m_ProgramObj);
+        m_ProgramObj = GL_NONE;
+    }
+    if (m_VertexShader) {
+        glDeleteShader(m_VertexShader);
+    }
+    if (m_FragmentShader) {
+        glDeleteShader(m_FragmentShader);
+    }
 }

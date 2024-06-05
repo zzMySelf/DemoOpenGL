@@ -10,20 +10,21 @@
 #include "util/ImageDef.h"
 #include "util/GLUtils.h"
 #include "util/Logger.h"
+#include "GLSampleBase.h"
 
-class TextureMapSample {
+class TextureMapSample : public GLSampleBase{
 public:
     TextureMapSample();
 
     ~TextureMapSample();
 
-    void loadImage(NativeImage *pImage);
+    virtual void loadImage(NativeImage *pImage);
 
-    void init();
+    virtual void init();
 
-    void draw(int screenW, int screenH);
+    virtual void draw(int screenW, int screenH);
 
-    void destory();
+    virtual void destroy();
 
 private:
     GLuint m_TextureId;

@@ -141,7 +141,7 @@ void TextureMapSample::draw(int screenW, int screenH) {
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, indices);
 }
 
-void TextureMapSample::destory() {
+void TextureMapSample::destroy() {
     if (m_ProgramObj)
     {
         glDeleteProgram(m_ProgramObj);

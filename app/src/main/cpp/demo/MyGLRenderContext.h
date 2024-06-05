@@ -27,16 +27,17 @@ public:
 
     void onDrawFrame();
 
+    void setRenderType(int paramType);
+
 private:
 
     MyGLRenderContext();
 
     static MyGLRenderContext* m_pContext;
 
-//    TriangleSample* m_Sample;
-    TextureMapSample* m_Sample;
-    int m_ScreenW;
-    int m_ScreenH;
+    GLSampleBase* m_Sample = nullptr;
+    int m_ScreenW = 0;
+    int m_ScreenH = 0;
 };
 
 

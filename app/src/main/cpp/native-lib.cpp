@@ -44,3 +44,8 @@ JNIEXPORT void JNICALL
 Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1OnDrawFrame(JNIEnv *env, jobject thiz) {
     MyGLRenderContext::getInstance()->onDrawFrame();
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1SetRenderType(JNIEnv *env, jobject thiz, jint type) {
+    MyGLRenderContext::getInstance()->setRenderType(type);
+}
