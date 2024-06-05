@@ -26,8 +26,10 @@ public:
 private:
     unsigned int VAO0;
     unsigned int VAO1;
+    unsigned int VAO2;
     unsigned int vbo0;
     unsigned int vbo1;
+    unsigned int vbo2;
 
     float colorValue = 0.25f;
 };

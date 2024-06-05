@@ -36,6 +36,12 @@ GLfloat  vertices1[] = {
         0.0f, 0.0f, 0.0f,
 };
 
+GLfloat  vertices2[] = {
+        0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 1.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  // bottom left
+        0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f   // top
+};
+
 TriangleSample::TriangleSample() {
 
 }
@@ -54,12 +60,13 @@ void TriangleSample::init() {
      */
     char vShaderStr[] =
             "#version 300 es                          \n"
-            "layout(location = 0) in vec4 vPosition;  \n"
-//            "out vec4 vertexColor;                    \n"
+            "layout(location = 0) in vec3 aPos;  \n"
+            "layout(location = 1) in vec3 aColor;  \n"
+            "out vec3 ourColor;  \n"
             "void main()                              \n"
             "{                                        \n"
-            "   gl_Position = vPosition;              \n"
-//            "   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);              \n"
+            "   gl_Position = vec4(aPos, 1.0);              \n"
+            "   ourColor = aColor;              \n"
             "}                                        \n";
 
     /**
@@ -72,12 +79,10 @@ void TriangleSample::init() {
             "#version 300 es                              \n"
             "precision mediump float;                     \n"
             "out vec4 fragColor;                          \n"
-            "uniform vec4 ourColor;                       \n"
-//            "in vec4 vertexColor;                         \n"
+            "in vec3 ourColor;                       \n"
             "void main()                                  \n"
             "{                                            \n"
-//            "   ourColor = vertexColor;                 \n"
-            "   fragColor = ourColor;  \n"
+            "   fragColor = vec4(ourColor, 1.0);            \n"
             "}                                            \n";
 
     m_ProgramObj = GLUtils::CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
@@ -86,58 +91,26 @@ void TriangleSample::init() {
     /**
      * 创建一个VAO
      */
-    glGenVertexArrays(1, &VAO0);
-    glGenVertexArrays(1, &VAO1);
+    glGenVertexArrays(1, &VAO2);
+    glGenBuffers(1, &vbo2);
+    glBindVertexArray(VAO2);
 
-    glBindVertexArray(VAO0);
-    /**
-     * 创建VBO
-     */
-    glGenBuffers(1, &vbo0);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo2);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices2), vertices2, GL_STATIC_DRAW);
 
-    // 顶点缓冲对象的缓冲类型是GL_ARRAY_BUFFER
-    glBindBuffer(GL_ARRAY_BUFFER, vbo0);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices0), vertices0, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)nullptr);
     glEnableVertexAttribArray(0);
-
-    glBindVertexArray(VAO1);
-    glGenBuffers(1, &vbo1);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
-    glEnableVertexAttribArray(0);
+    // 颜色属性
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+    glEnableVertexAttribArray(1);
 }
 
 void TriangleSample::draw(int screenW, int screenH) {
-    // 如果为 0，表示没有有效的 OpenGL 着色器程序对象
     if (m_ProgramObj == 0) {
         return;
     }
     glUseProgram(m_ProgramObj);
-
-    float value = colorValueAtTime();
-    int vertexColorLocation = glGetUniformLocation(m_ProgramObj, "ourColor");
-    if (vertexColorLocation != -1 ){
-        glUniform4f(vertexColorLocation, 0.0f, value, 0.0f, 1.0f);
-    }
-
-    glBindVertexArray(VAO0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-
-    glBindVertexArray(VAO1);
     glDrawArrays(GL_TRIANGLES, 0, 3);
-
-
-
-
-//
-//    /**
-//     * 绘制第二个三角形  将不同的VBO绑定到GL_ARRAY_BUFFER目标上，并复制新的数据。
-//     */
-//    glBindBuffer(GL_ARRAY_BUFFER, vbo1);
-//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)nullptr);
-//    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void TriangleSample::destroy() {
