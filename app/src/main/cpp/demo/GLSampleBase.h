@@ -13,6 +13,8 @@
 #define SAMPLE_TYPE_KEY_TRIANGLE                SAMPLE_TYPE + 0
 #define SAMPLE_TYPE_KEY_TEXTURE_MAP             SAMPLE_TYPE + 1
 
+#define APP_FILE_PATH "/sdcard/Android/data/com.baidu.demoopengl/files/"
+
 class GLSampleBase
 {
 public:

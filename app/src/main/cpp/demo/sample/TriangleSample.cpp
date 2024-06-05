@@ -3,6 +3,8 @@
 //
 
 #include "TriangleSample.h"
+#include "Shader.h"
+
 
 /**
  * 配置顶点属性。在这里，它指定了顶点属性索引为 0（因为参数为 0），
@@ -53,40 +55,7 @@ TriangleSample::~TriangleSample() {
 }
 
 void TriangleSample::init() {
-    /**
-     * 配置顶点着色器
-     * 1、gl_Position 包含1-4个 float分量，可以通过vec3 vec4 区分出来
-     * 2、in 代表输入变量
-     */
-    char vShaderStr[] =
-            "#version 300 es                          \n"
-            "layout(location = 0) in vec3 aPos;  \n"
-            "layout(location = 1) in vec3 aColor;  \n"
-            "out vec3 ourColor;  \n"
-            "void main()                              \n"
-            "{                                        \n"
-            "   gl_Position = vec4(aPos, 1.0);              \n"
-            "   ourColor = aColor;              \n"
-            "}                                        \n";
-
-    /**
-     * 配置片元着色器
-     *
-     * RGBA：红绿蓝-alpha透明度
-     * 1、out代表输出变量 表示最终的输出颜色
-     */
-    char fShaderStr[] =
-            "#version 300 es                              \n"
-            "precision mediump float;                     \n"
-            "out vec4 fragColor;                          \n"
-            "in vec3 ourColor;                       \n"
-            "void main()                                  \n"
-            "{                                            \n"
-            "   fragColor = vec4(ourColor, 1.0);            \n"
-            "}                                            \n";
-
-    m_ProgramObj = GLUtils::CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
-
+    shader = new Shader(APP_FILE_PATH"V_TriangleSample.glsl",APP_FILE_PATH"F_TriangleSample.glsl");
 
     /**
      * 创建一个VAO
@@ -106,10 +75,9 @@ void TriangleSample::init() {
 }
 
 void TriangleSample::draw(int screenW, int screenH) {
-    if (m_ProgramObj == 0) {
-        return;
+    if (shader) {
+        shader->use();
     }
-    glUseProgram(m_ProgramObj);
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
@@ -117,6 +85,10 @@ void TriangleSample::destroy() {
     if (m_ProgramObj) {
         glDeleteProgram(m_ProgramObj);
         m_ProgramObj = GL_NONE;
+    }
+
+    if (shader) {
+        shader = nullptr;
     }
 }
 

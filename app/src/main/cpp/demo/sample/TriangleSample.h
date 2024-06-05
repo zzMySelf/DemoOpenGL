@@ -7,6 +7,7 @@
 
 #include "util/GLUtils.h"
 #include "GLSampleBase.h"
+#include "Shader.h"
 
 
 class TriangleSample : public GLSampleBase{
@@ -32,6 +33,8 @@ private:
     unsigned int vbo2;
 
     float colorValue = 0.25f;
+
+    Shader *shader = nullptr;
 };
 
 
