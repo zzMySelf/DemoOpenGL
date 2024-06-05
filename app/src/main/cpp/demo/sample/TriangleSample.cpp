@@ -55,9 +55,11 @@ void TriangleSample::init() {
     char vShaderStr[] =
             "#version 300 es                          \n"
             "layout(location = 0) in vec4 vPosition;  \n"
+//            "out vec4 vertexColor;                    \n"
             "void main()                              \n"
             "{                                        \n"
             "   gl_Position = vPosition;              \n"
+//            "   vertexColor = vec4(0.5, 0.0, 0.0, 1.0);              \n"
             "}                                        \n";
 
     /**
@@ -70,9 +72,12 @@ void TriangleSample::init() {
             "#version 300 es                              \n"
             "precision mediump float;                     \n"
             "out vec4 fragColor;                          \n"
+            "uniform vec4 ourColor;                       \n"
+//            "in vec4 vertexColor;                         \n"
             "void main()                                  \n"
             "{                                            \n"
-            "   fragColor = vec4 ( 1.0, 0.0, 0.0, 1.0 );  \n"
+//            "   ourColor = vertexColor;                 \n"
+            "   fragColor = ourColor;  \n"
             "}                                            \n";
 
     m_ProgramObj = GLUtils::CreateProgram(vShaderStr, fShaderStr, m_VertexShader, m_FragmentShader);
@@ -111,6 +116,12 @@ void TriangleSample::draw(int screenW, int screenH) {
     }
     glUseProgram(m_ProgramObj);
 
+    float value = colorValueAtTime();
+    int vertexColorLocation = glGetUniformLocation(m_ProgramObj, "ourColor");
+    if (vertexColorLocation != -1 ){
+        glUniform4f(vertexColorLocation, 0.0f, value, 0.0f, 1.0f);
+    }
+
     glBindVertexArray(VAO0);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -134,10 +145,13 @@ void TriangleSample::destroy() {
         glDeleteProgram(m_ProgramObj);
         m_ProgramObj = GL_NONE;
     }
-    if (m_VertexShader) {
-        glDeleteShader(m_VertexShader);
+}
+
+
+float TriangleSample::colorValueAtTime() {
+    if (colorValue > 0.85f) {
+        colorValue = 0.15f;
     }
-    if (m_FragmentShader) {
-        glDeleteShader(m_FragmentShader);
-    }
+    colorValue += 0.005f;
+    return colorValue;
 }

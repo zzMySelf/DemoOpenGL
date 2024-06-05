@@ -21,11 +21,15 @@ public:
 
     virtual void destroy();
 
+    float colorValueAtTime();
+
 private:
     unsigned int VAO0;
     unsigned int VAO1;
     unsigned int vbo0;
     unsigned int vbo1;
+
+    float colorValue = 0.25f;
 };
 
 

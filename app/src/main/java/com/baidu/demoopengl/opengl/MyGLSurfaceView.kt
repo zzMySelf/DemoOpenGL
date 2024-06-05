@@ -29,7 +29,7 @@ class MyGLSurfaceView : GLSurfaceView {
         mNativeRender = MyNativeRender()
         mNativeRender?.let {
             mGLRender = MyGlRender(it)
-            it.native_SetRenderType(201)
+            it.native_SetRenderType(200)
         }
         setRenderer(mGLRender)
         renderMode = RENDERMODE_CONTINUOUSLY
