@@ -29,12 +29,13 @@ class MyGLSurfaceView : GLSurfaceView {
         mNativeRender = MyNativeRender()
         mNativeRender?.let {
             mGLRender = MyGlRender(it)
-            it.native_SetRenderType(200)
+            it.native_SetRenderType(202)
         }
-        setRenderer(mGLRender)
-        renderMode = RENDERMODE_CONTINUOUSLY
 
         loadRGBAImage(R.drawable.dzzz)
+
+        setRenderer(mGLRender)
+        renderMode = RENDERMODE_CONTINUOUSLY
     }
 
     inner class MyGlRender(private val mNativeRender: MyNativeRender) : Renderer {

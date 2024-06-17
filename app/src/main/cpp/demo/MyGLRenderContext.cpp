@@ -23,6 +23,8 @@ void MyGLRenderContext::setRenderType(int paramType) {
         m_Sample = new TriangleSample();
     } else if (paramType == SAMPLE_TYPE_KEY_TEXTURE_MAP) {
         m_Sample = new TextureMapSample();
+    }else if (paramType == SAMPLE_TYPE_KEY_TEXTURE) {
+        m_Sample = new TextureSample();
     }
 }
 

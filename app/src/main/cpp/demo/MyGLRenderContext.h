@@ -6,9 +6,9 @@
 #define DEMOOPENGL_MYGLRENDERCONTEXT_H
 
 #include <cstdint>
-#include <GLES3/gl3.h>
 #include "sample/TriangleSample.h"
 #include "sample/TextureMapSample.h"
+#include "sample/TextureSample.h"
 
 class MyGLRenderContext {
 public:
