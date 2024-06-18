@@ -30,6 +30,7 @@ private:
     NativeImage renderImage;
 
     GLuint textureId;
+    GLuint textureId1;
     GLuint programObj;
     Shader *shader = nullptr;
 
