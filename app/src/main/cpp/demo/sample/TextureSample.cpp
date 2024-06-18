@@ -25,13 +25,19 @@ TextureSample::~TextureSample() {
 
 }
 
-void TextureSample::loadImage(NativeImage *pImage) {
+void TextureSample::loadImage(NativeImage *pImage0, NativeImage *pImage1) {
     Logger::d("TextureSample", "loadImage");
-    if (pImage) {
-        renderImage.width = pImage->width;
-        renderImage.height = pImage->height;
-        renderImage.format = pImage->format;
-        NativeImageUtil::CopyNativeImage(pImage, &renderImage);
+    if (pImage0) {
+        renderImage0.width = pImage0->width;
+        renderImage0.height = pImage0->height;
+        renderImage0.format = pImage0->format;
+        NativeImageUtil::CopyNativeImage(pImage0, &renderImage0);
+    }
+    if (pImage1) {
+        renderImage1.width = pImage1->width;
+        renderImage1.height = pImage1->height;
+        renderImage1.format = pImage1->format;
+        NativeImageUtil::CopyNativeImage(pImage1, &renderImage1);
     }
 }
 
@@ -61,37 +67,41 @@ void TextureSample::init() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8* sizeof(float ), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
 
+    Logger::d("TextureSample", "textureId");
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    Logger::d("TextureSample", "glTexImage2D renderImage0");
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGBA,
-                 renderImage.width,
-                 renderImage.height,
+                 renderImage0.width,
+                 renderImage0.height,
                  0,
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
-                 renderImage.ppPlane[0]);
+                 renderImage0.ppPlane[0]);
 
+    Logger::d("TextureSample", "textureId1");
     glGenTextures(1, &textureId1);
     glBindTexture(GL_TEXTURE_2D, textureId1);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    Logger::d("TextureSample", "glTexImage2D renderImage1");
     glTexImage2D(GL_TEXTURE_2D,
                  0,
                  GL_RGBA,
-                 renderImage.width,
-                 renderImage.height,
+                 renderImage1.width,
+                 renderImage1.height,
                  0,
                  GL_RGBA,
                  GL_UNSIGNED_BYTE,
-                 renderImage.ppPlane[0]);
+                 renderImage1.ppPlane[0]);
 //    glGenerateMipmap(GL_TEXTURE_2D);
 
     shader->use();
@@ -126,5 +136,6 @@ void TextureSample::destroy() {
         glDeleteProgram(shader->getProgramId());
         shader = nullptr;
     }
-    NativeImageUtil::FreeNativeImage(&renderImage);
+    NativeImageUtil::FreeNativeImage(&renderImage0);
+    NativeImageUtil::FreeNativeImage(&renderImage1);
 }

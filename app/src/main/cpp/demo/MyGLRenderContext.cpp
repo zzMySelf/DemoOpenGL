@@ -53,6 +53,63 @@ void MyGLRenderContext::setImageData(int format, int width, int height, uint8_t 
     }
 }
 
+void MyGLRenderContext::setImageData(int format0, int width0, int height0, uint8_t *pData0,
+                                     int format1, int width1, int height1, uint8_t *pData1) {
+    NativeImage nativeImage0;
+    if (pData0 != nullptr) {
+        nativeImage0.format = format0;
+        nativeImage0.width = width0;
+        nativeImage0.height = height0;
+        nativeImage0.ppPlane[0] = pData0;
+
+        switch (format0) {
+            case IMAGE_FORMAT_NV12:
+            case IMAGE_FORMAT_NV21:
+                nativeImage0.ppPlane[1] = nativeImage0.ppPlane[0] + width0 + height0;
+                break;
+            case IMAGE_FORMAT_I420:
+                nativeImage0.ppPlane[1] = nativeImage0.ppPlane[0] + width0 + height0;
+                nativeImage0.ppPlane[2] = nativeImage0.ppPlane[0] + (width0 * height0 / 4);
+                break;
+            default:
+                break;
+
+        }
+    }
+    NativeImage nativeImage1;
+    if (pData1 != nullptr) {
+        nativeImage1.format = format1;
+        nativeImage1.width = width1;
+        nativeImage1.height = height1;
+        nativeImage1.ppPlane[0] = pData1;
+
+        switch (format1) {
+            case IMAGE_FORMAT_NV12:
+            case IMAGE_FORMAT_NV21:
+                nativeImage1.ppPlane[1] = nativeImage1.ppPlane[0] + width1 + height1;
+                break;
+            case IMAGE_FORMAT_I420:
+                nativeImage1.ppPlane[1] = nativeImage1.ppPlane[0] + width1 + height1;
+                nativeImage1.ppPlane[2] = nativeImage1.ppPlane[0] + (width1 * height1 / 4);
+                break;
+            default:
+                break;
+
+        }
+    }
+
+    if (nativeImage1.isValid()) {
+        if (m_Sample) {
+            m_Sample->loadImage(&nativeImage0, &nativeImage1);
+        }
+    } else {
+        if (m_Sample) {
+            m_Sample->loadImage(&nativeImage0);
+        }
+    }
+
+}
+
 void MyGLRenderContext::onDrawFrame() {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     if (m_Sample) {

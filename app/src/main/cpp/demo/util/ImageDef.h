@@ -66,6 +66,11 @@ struct SizeF {
         ppPlane[1] = nullptr;
         ppPlane[2] = nullptr;
     }
+
+    bool isValid() const {
+        return width != 0 && height != 0 && format != 0 &&
+               ppPlane[0] != nullptr;
+    }
 };
 
 class NativeImageUtil {

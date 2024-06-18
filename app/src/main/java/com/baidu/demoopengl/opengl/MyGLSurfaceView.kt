@@ -32,7 +32,7 @@ class MyGLSurfaceView : GLSurfaceView {
             it.native_SetRenderType(202)
         }
 
-        loadRGBAImage(R.drawable.dzzz)
+        load2RGBAImage(R.drawable.dzzz, R.drawable.awesomeface)
 
         setRenderer(mGLRender)
         renderMode = RENDERMODE_CONTINUOUSLY
@@ -73,5 +73,61 @@ class MyGLSurfaceView : GLSurfaceView {
                 e.printStackTrace()
             }
         }
+    }
+
+    private fun load2RGBAImage(resId0: Int, resId1: Int) {
+        var imageData0: ByteArray? = null
+        var width0 = 0
+        var height0 = 0
+
+        var imageData1: ByteArray? = null
+        var width1 = 0
+        var height1 = 0
+        resId0.run {
+            val `is` = resources.openRawResource(this)
+            val bitmap: Bitmap?
+            try {
+                bitmap = BitmapFactory.decodeStream(`is`)
+                if (bitmap != null) {
+                    val bytes = bitmap.byteCount
+                    val buf = ByteBuffer.allocate(bytes)
+                    bitmap.copyPixelsToBuffer(buf)
+                    imageData0 = buf.array()
+                    width0 = bitmap.width
+                    height0 = bitmap.height
+                }
+            } finally {
+                try {
+                    `is`.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        resId1.run {
+            val `is` = resources.openRawResource(this)
+            val bitmap: Bitmap?
+            try {
+                bitmap = BitmapFactory.decodeStream(`is`)
+                if (bitmap != null) {
+                    val bytes = bitmap.byteCount
+                    val buf = ByteBuffer.allocate(bytes)
+                    bitmap.copyPixelsToBuffer(buf)
+                    imageData1 = buf.array()
+                    width1 = bitmap.width
+                    height1 = bitmap.height
+                }
+            } finally {
+                try {
+                    `is`.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        mNativeRender?.native_Set2ImageData(
+            0x01, width0, height0, imageData0,
+            0x01, width1, height1, imageData1
+        )
     }
 }

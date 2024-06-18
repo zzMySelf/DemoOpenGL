@@ -18,7 +18,7 @@ public:
 
     ~TextureSample();
 
-    virtual void loadImage(NativeImage *pImage);
+    virtual void loadImage(NativeImage *pImage0, NativeImage *pImage1);
 
     virtual void init();
 
@@ -27,7 +27,8 @@ public:
     virtual void destroy();
 
 private:
-    NativeImage renderImage;
+    NativeImage renderImage0;
+    NativeImage renderImage1;
 
     GLuint textureId;
     GLuint textureId1;

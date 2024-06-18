@@ -31,6 +31,35 @@ Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1SetImageData(JNIEnv *env
 }
 extern "C"
 JNIEXPORT void JNICALL
+Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1Set2ImageData(JNIEnv *env, jobject thiz,
+                                                                      jint format0, jint width0, jint height0, jbyteArray imageData0,
+                                                                      jint format1, jint width1, jint height1, jbyteArray imageData1) {
+    uint8_t *buf0 = nullptr;
+    uint8_t *buf1 = nullptr;
+
+    if (imageData0 != nullptr) {
+        int len0 = env->GetArrayLength(imageData0);
+        buf0 = new uint8_t[len0];
+        env->GetByteArrayRegion(imageData0, 0, len0, reinterpret_cast<jbyte *>(buf0));
+    }
+
+    if (imageData1 != nullptr) {
+        int len1 = env->GetArrayLength(imageData1);
+        buf1 = new uint8_t[len1];
+        env->GetByteArrayRegion(imageData1, 0, len1, reinterpret_cast<jbyte *>(buf1));
+    }
+
+    MyGLRenderContext::getInstance()->setImageData(format0, width0, height0, buf0,
+                                                   format1, width1, height1, buf1);
+
+    delete[] buf0;
+    env->DeleteLocalRef(imageData0);
+    delete[] buf1;
+    env->DeleteLocalRef(imageData1);
+
+}
+extern "C"
+JNIEXPORT void JNICALL
 Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1OnSurfaceCreated(JNIEnv *env, jobject thiz) {
     MyGLRenderContext::getInstance()->onSurfaceCreated();
 }

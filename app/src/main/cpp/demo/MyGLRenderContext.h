@@ -20,6 +20,8 @@ public:
     ~MyGLRenderContext();
 
     void setImageData(int format, int width, int height, uint8_t *pData);
+    void setImageData(int format0, int width0, int height0, uint8_t *pData0,
+                      int format1, int width1, int height1, uint8_t *pData1);
 
     void onSurfaceCreated();
 

@@ -38,6 +38,9 @@ public:
     virtual void loadImage(NativeImage *pImage)
     {};
 
+    virtual void loadImage(NativeImage *pImage0, NativeImage *pImage1)
+    {};
+
     virtual void loadMultiImageWithIndex(int index, NativeImage *pImage)
     {};
 
