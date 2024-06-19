@@ -7,9 +7,13 @@ in vec2 TexCoord;
 // texture sampler
 uniform sampler2D texture0;
 uniform sampler2D texture1;
+uniform float mixValue;
 
 void main()
 {
-    vec2 flippedTexCoord = vec2(TexCoord.x, 1.0 - TexCoord.y);
-    FragColor = mix(texture(texture0, flippedTexCoord), texture(texture1, flippedTexCoord), 0.2);
+    // 翻转
+    vec2 flippedTexCoordy = vec2(TexCoord.x, 1.0 - TexCoord.y);
+    // 翻转第二个纹理
+    vec2 flippedTexCoordX = vec2(1.0 - TexCoord.x, 1.0 - TexCoord.y);
+    FragColor = mix(texture(texture0, flippedTexCoordy), texture(texture1, flippedTexCoordX), mixValue);
 }

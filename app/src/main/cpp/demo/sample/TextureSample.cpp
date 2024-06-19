@@ -6,10 +6,10 @@
 
 float vertices[] = {
         //     ---- 位置 ----       ---- 颜色 ----     - 纹理坐标 -
-        0.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f,       1.0f, 1.0f,   // 右上
-        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // 右下
+        0.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f,       2.0f, 2.0f,   // 右上
+        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   // 右下
         -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,       0.0f, 0.0f,   // 左下
-        -0.5f, 0.5f, 0.0f,      1.0f, 1.0f, 0.0f,        0.0f, 1.0f    // 左上
+        -0.5f, 0.5f, 0.0f,      1.0f, 1.0f, 0.0f,        0.0f, 2.0f    // 左上
 };
 
 unsigned int indices[] = {
@@ -88,8 +88,8 @@ void TextureSample::init() {
     Logger::d("TextureSample", "textureId1");
     glGenTextures(1, &textureId1);
     glBindTexture(GL_TEXTURE_2D, textureId1);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     Logger::d("TextureSample", "glTexImage2D renderImage1");
@@ -107,6 +107,7 @@ void TextureSample::init() {
     shader->use();
     shader->setInt("texture0", 0);
     shader->setInt("texture1", 1);
+    shader->setFloat("mixValue", 0.8f);
 
 }
 
@@ -114,7 +115,7 @@ void TextureSample::draw(int screenW, int screenH) {
     if (!shader) {
         return;
     }
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     shader->use();
