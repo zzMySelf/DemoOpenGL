@@ -29,7 +29,7 @@ class MyGLSurfaceView : GLSurfaceView {
         mNativeRender = MyNativeRender()
         mNativeRender?.let {
             mGLRender = MyGlRender(it)
-            it.native_SetRenderType(202)
+            it.native_SetRenderType(203)
         }
 
         load2RGBAImage(R.drawable.dzzz, R.drawable.awesomeface)

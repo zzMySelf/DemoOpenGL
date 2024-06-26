@@ -6,7 +6,7 @@
 #include "util/Logger.h"
 #include "util/ImageDef.h"
 
-MyGLRenderContext* MyGLRenderContext::m_pContext = nullptr;
+MyGLRenderContext *MyGLRenderContext::m_pContext = nullptr;
 
 MyGLRenderContext::MyGLRenderContext() {
 }
@@ -23,8 +23,10 @@ void MyGLRenderContext::setRenderType(int paramType) {
         m_Sample = new TriangleSample();
     } else if (paramType == SAMPLE_TYPE_KEY_TEXTURE_MAP) {
         m_Sample = new TextureMapSample();
-    }else if (paramType == SAMPLE_TYPE_KEY_TEXTURE) {
+    } else if (paramType == SAMPLE_TYPE_KEY_TEXTURE) {
         m_Sample = new TextureSample();
+    } else if (paramType == SAMPLE_TYPE_KEY_TRANSFORM) {
+        m_Sample = new TransformSample();
     }
 }
 
@@ -124,7 +126,7 @@ void MyGLRenderContext::onSurfaceChanged(int width, int height) {
 }
 
 void MyGLRenderContext::onSurfaceCreated() {
-    glClearColor(1.0f,1.0f,1.0f, 1.0f);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     if (m_Sample != nullptr) {
         m_Sample->init();
     }

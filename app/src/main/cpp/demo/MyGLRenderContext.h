@@ -9,6 +9,7 @@
 #include "sample/TriangleSample.h"
 #include "sample/TextureMapSample.h"
 #include "sample/TextureSample.h"
+#include "sample/TransformSample.h"
 
 class MyGLRenderContext {
 public:
