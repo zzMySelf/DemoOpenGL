@@ -63,6 +63,13 @@ public:
 
     virtual void destroy() = 0;
 
+    double getCurrentTime() {
+        using namespace std::chrono;
+        static auto start = steady_clock::now();
+        auto now = steady_clock::now();
+        return duration_cast<duration<double>>(now - start).count();
+    }
+
 protected:
     GLuint m_VertexShader;
     GLuint m_FragmentShader;
