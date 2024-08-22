@@ -1,0 +1,121 @@
+package com.tera.scan.ui.view.widget;
+
+import android.content.Context;
+import android.util.AttributeSet;
+import android.view.View;
+import androidx.annotation.IdRes;
+import androidx.appcompat.widget.AppCompatCheckBox;
+import com.tera.scan.ui.view.helper.UIBaseHelper;
+import com.tera.scan.ui.view.helper.UIHelper;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+@Metadata(d1 = {"\u00002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\b\n\u0002\b\u0004\n\u0002\u0010\u0002\n\u0002\b\t\b\u0010\u0018\u00002\u00020\u00012\u000e\u0012\n\u0012\b\u0012\u0004\u0012\u00020\u00000\u00030\u0002B\u000f\b\u0016\u0012\u0006\u0010\u0004\u001a\u00020\u0005¢\u0006\u0002\u0010\u0006B\u0019\b\u0016\u0012\u0006\u0010\u0004\u001a\u00020\u0005\u0012\b\u0010\u0007\u001a\u0004\u0018\u00010\b¢\u0006\u0002\u0010\tB!\b\u0016\u0012\u0006\u0010\u0004\u001a\u00020\u0005\u0012\b\u0010\u0007\u001a\u0004\u0018\u00010\b\u0012\u0006\u0010\n\u001a\u00020\u000b¢\u0006\u0002\u0010\fJ\u000e\u0010\u000e\u001a\b\u0012\u0004\u0012\u00020\u00000\u0003H\u0016J\"\u0010\u000f\u001a\u00020\u00102\u0006\u0010\u0004\u001a\u00020\u00052\b\u0010\u0007\u001a\u0004\u0018\u00010\b2\u0006\u0010\n\u001a\u00020\u000bH\u0002J\u0018\u0010\u0011\u001a\u00020\u00102\u0006\u0010\u0012\u001a\u00020\u000b2\u0006\u0010\u0013\u001a\u00020\u000bH\u0014J\b\u0010\u0014\u001a\u00020\u0010H\u0016J\u0010\u0010\u0015\u001a\u00020\u00102\u0006\u0010\u0016\u001a\u00020\u000bH\u0016J\u0012\u0010\u0017\u001a\u00020\u00102\b\b\u0001\u0010\u0018\u001a\u00020\u000bH\u0016R\u0014\u0010\r\u001a\b\u0012\u0004\u0012\u00020\u00000\u0003X.¢\u0006\u0002\n\u0000¨\u0006\u0019"}, d2 = {"Lcom/tera/scan/ui/view/widget/UICheckBox;", "Landroidx/appcompat/widget/AppCompatCheckBox;", "Lcom/tera/scan/ui/view/helper/UIHelper;", "Lcom/tera/scan/ui/view/helper/UIBaseHelper;", "context", "Landroid/content/Context;", "(Landroid/content/Context;)V", "attr", "Landroid/util/AttributeSet;", "(Landroid/content/Context;Landroid/util/AttributeSet;)V", "defStyleAttr", "", "(Landroid/content/Context;Landroid/util/AttributeSet;I)V", "uiBaseHelper", "getHelper", "init", "", "onMeasure", "widthMeasureSpec", "heightMeasureSpec", "refreshDrawableState", "setBackgroundColor", "color", "setBackgroundResource", "resid", "component-ui-widget_aiscanConfigRelease"}, k = 1, mv = {1, 6, 0}, xi = 48)
+public class UICheckBox extends AppCompatCheckBox implements UIHelper<UIBaseHelper<UICheckBox>> {
+    @NotNull
+    public Map<Integer, View> _$_findViewCache;
+    public UIBaseHelper<UICheckBox> uiBaseHelper;
+
+    /* JADX INFO: this call moved to the top of the method (can break code semantics) */
+    public UICheckBox(@NotNull Context context) {
+        this(context, (AttributeSet) null);
+        Intrinsics.checkNotNullParameter(context, "context");
+    }
+
+    private final void init(Context context, AttributeSet attributeSet, int i2) {
+        UIBaseHelper<UICheckBox> uIBaseHelper = new UIBaseHelper<>(context, this);
+        this.uiBaseHelper = uIBaseHelper;
+        if (uIBaseHelper == null) {
+            Intrinsics.throwUninitializedPropertyAccessException("uiBaseHelper");
+            uIBaseHelper = null;
+        }
+        uIBaseHelper.pf(context, attributeSet, i2);
+    }
+
+    public void _$_clearFindViewByIdCache() {
+        this._$_findViewCache.clear();
+    }
+
+    @Nullable
+    public View _$_findCachedViewById(int i2) {
+        Map<Integer, View> map = this._$_findViewCache;
+        View view = map.get(Integer.valueOf(i2));
+        if (view != null) {
+            return view;
+        }
+        View findViewById = findViewById(i2);
+        if (findViewById == null) {
+            return null;
+        }
+        map.put(Integer.valueOf(i2), findViewById);
+        return findViewById;
+    }
+
+    @NotNull
+    public UIBaseHelper<UICheckBox> getHelper() {
+        UIBaseHelper<UICheckBox> uIBaseHelper = this.uiBaseHelper;
+        if (uIBaseHelper != null) {
+            return uIBaseHelper;
+        }
+        Intrinsics.throwUninitializedPropertyAccessException("uiBaseHelper");
+        return null;
+    }
+
+    public void onMeasure(int i2, int i3) {
+        UIBaseHelper<UICheckBox> uIBaseHelper = this.uiBaseHelper;
+        if (uIBaseHelper == null) {
+            Intrinsics.throwUninitializedPropertyAccessException("uiBaseHelper");
+            uIBaseHelper = null;
+        }
+        int[] eee = uIBaseHelper.eee(i2, i3);
+        super.onMeasure(eee[0], eee[1]);
+    }
+
+    public void refreshDrawableState() {
+        super.refreshDrawableState();
+        UIBaseHelper<UICheckBox> uIBaseHelper = this.uiBaseHelper;
+        if (uIBaseHelper == null) {
+            Intrinsics.throwUninitializedPropertyAccessException("uiBaseHelper");
+            uIBaseHelper = null;
+        }
+        uIBaseHelper.rrr();
+    }
+
+    public void setBackgroundColor(int i2) {
+        super.setBackgroundColor(i2);
+        UIBaseHelper<UICheckBox> uIBaseHelper = this.uiBaseHelper;
+        if (uIBaseHelper == null) {
+            Intrinsics.throwUninitializedPropertyAccessException("uiBaseHelper");
+            uIBaseHelper = null;
+        }
+        uIBaseHelper.aaa(i2);
+    }
+
+    public void setBackgroundResource(@IdRes int i2) {
+        super.setBackgroundResource(i2);
+        UIBaseHelper<UICheckBox> uIBaseHelper = this.uiBaseHelper;
+        if (uIBaseHelper == null) {
+            Intrinsics.throwUninitializedPropertyAccessException("uiBaseHelper");
+            uIBaseHelper = null;
+        }
+        uIBaseHelper.qqq(i2);
+    }
+
+    /* JADX INFO: this call moved to the top of the method (can break code semantics) */
+    public UICheckBox(@NotNull Context context, @Nullable AttributeSet attributeSet) {
+        this(context, attributeSet, 0);
+        Intrinsics.checkNotNullParameter(context, "context");
+    }
+
+    /* JADX INFO: super call moved to the top of the method (can break code semantics) */
+    public UICheckBox(@NotNull Context context, @Nullable AttributeSet attributeSet, int i2) {
+        super(context, attributeSet, i2);
+        Intrinsics.checkNotNullParameter(context, "context");
+        this._$_findViewCache = new LinkedHashMap();
+        init(context, attributeSet, i2);
+    }
+}

@@ -1,0 +1,20 @@
+package com.baidu.apollon.permission;
+
+import android.annotation.TargetApi;
+import android.app.AppOpsManager;
+import android.content.Context;
+
+@TargetApi(23)
+public class b {
+    public static String a(String str) {
+        return AppOpsManager.permissionToOp(str);
+    }
+
+    public static int a(Context context, String str, int i2, String str2) {
+        return ((AppOpsManager) context.getSystemService(AppOpsManager.class)).noteOp(str, i2, str2);
+    }
+
+    public static int a(Context context, String str, String str2) {
+        return ((AppOpsManager) context.getSystemService(AppOpsManager.class)).noteProxyOp(str, str2);
+    }
+}

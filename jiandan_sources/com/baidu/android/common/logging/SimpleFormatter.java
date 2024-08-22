@@ -1,0 +1,89 @@
+package com.baidu.android.common.logging;
+
+import com.baidu.android.common.others.IStringUtil;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.text.FieldPosition;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+import org.apache.commons.lang3.StringUtils;
+
+public class SimpleFormatter extends Formatter {
+    public static String format = "{0,date} {0,time}";
+    public Object[] args = new Object[1];
+    public Date dat = new Date();
+    public MessageFormat formatter;
+
+    public synchronized String format(LogRecord logRecord) {
+        String str;
+        String str2;
+        int i2;
+        StringBuffer stringBuffer;
+        StackTraceElement[] stackTrace = new Throwable().getStackTrace();
+        int length = stackTrace.length;
+        int i3 = 0;
+        boolean z = false;
+        while (true) {
+            if (i3 >= length) {
+                str = null;
+                str2 = null;
+                i2 = 0;
+                break;
+            }
+            StackTraceElement stackTraceElement = stackTrace[i3];
+            if (stackTraceElement.getClassName().startsWith(Log.class.getName())) {
+                z = true;
+            } else if (z) {
+                str = stackTraceElement.getClassName();
+                str2 = stackTraceElement.getMethodName();
+                i2 = stackTraceElement.getLineNumber();
+                break;
+            }
+            i3++;
+        }
+        logRecord.setSourceClassName(str);
+        logRecord.setSourceMethodName(str2);
+        stringBuffer = new StringBuffer();
+        this.dat.setTime(logRecord.getMillis());
+        this.args[0] = this.dat;
+        StringBuffer stringBuffer2 = new StringBuffer();
+        if (this.formatter == null) {
+            this.formatter = new MessageFormat(format);
+        }
+        this.formatter.format(this.args, stringBuffer2, (FieldPosition) null);
+        stringBuffer.append(stringBuffer2);
+        stringBuffer.append(IStringUtil.CURRENT_PATH + (logRecord.getMillis() % 1000));
+        stringBuffer.append(" ");
+        if (logRecord.getSourceClassName() != null) {
+            stringBuffer.append(logRecord.getSourceClassName());
+        } else {
+            stringBuffer.append(logRecord.getLoggerName());
+        }
+        if (logRecord.getSourceMethodName() != null) {
+            stringBuffer.append(" ");
+            stringBuffer.append(logRecord.getSourceMethodName());
+        }
+        stringBuffer.append(" ");
+        stringBuffer.append(i2);
+        stringBuffer.append(" ");
+        String formatMessage = formatMessage(logRecord);
+        stringBuffer.append(logRecord.getLevel().getLocalizedName());
+        stringBuffer.append(": ");
+        stringBuffer.append(formatMessage);
+        stringBuffer.append(StringUtils.LF);
+        if (logRecord.getThrown() != null) {
+            try {
+                StringWriter stringWriter = new StringWriter();
+                PrintWriter printWriter = new PrintWriter(stringWriter);
+                logRecord.getThrown().printStackTrace(printWriter);
+                printWriter.close();
+                stringBuffer.append(stringWriter.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return stringBuffer.toString();
+    }
+}

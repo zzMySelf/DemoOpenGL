@@ -1,0 +1,17 @@
+package com.baidu.searchbox.video.feedflow.flow.bottom;
+
+import androidx.lifecycle.Observer;
+import kotlin.Unit;
+
+/* compiled from: D8$$SyntheticClass */
+public final /* synthetic */ class BottomBarComponent$$ExternalSyntheticLambda13 implements Observer {
+    public final /* synthetic */ BottomBarComponent f$0;
+
+    public /* synthetic */ BottomBarComponent$$ExternalSyntheticLambda13(BottomBarComponent bottomBarComponent) {
+        this.f$0 = bottomBarComponent;
+    }
+
+    public final void onChanged(Object obj) {
+        BottomBarComponent.m6087onAttachToManager$lambda30$lambda28(this.f$0, (Unit) obj);
+    }
+}

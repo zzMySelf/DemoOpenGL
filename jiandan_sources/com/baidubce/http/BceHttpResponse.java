@@ -1,0 +1,80 @@
+package com.baidubce.http;
+
+import com.baidubce.util.BLog;
+import com.baidubce.util.DateUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import okhttp3.Headers;
+import okhttp3.Response;
+
+public class BceHttpResponse {
+    public InputStream content;
+    public Response httpResponse;
+
+    public BceHttpResponse(Response response) throws IOException {
+        this.httpResponse = response;
+        try {
+            this.content = response.body().byteStream();
+        } catch (Exception unused) {
+            this.content = null;
+        }
+    }
+
+    public InputStream getContent() {
+        return this.content;
+    }
+
+    public String getHeader(String str) {
+        return this.httpResponse.header(str, (String) null);
+    }
+
+    public long getHeaderAsLong(String str) {
+        String header = getHeader(str);
+        if (header == null) {
+            return -1;
+        }
+        try {
+            return Long.valueOf(header).longValue();
+        } catch (Exception e) {
+            BLog.error("Invalid " + str + ":" + header, (Throwable) e);
+            return -1;
+        }
+    }
+
+    public Date getHeaderAsRfc822Date(String str) {
+        String header = getHeader(str);
+        if (header == null) {
+            return null;
+        }
+        try {
+            return DateUtils.parseRfc822Date(header);
+        } catch (Exception e) {
+            BLog.error("Invalid " + str + ":" + header, (Throwable) e);
+            return null;
+        }
+    }
+
+    public Map<String, String> getHeaders() {
+        Headers headers = getHttpResponse().headers();
+        HashMap hashMap = new HashMap();
+        for (int i2 = 0; i2 < headers.size(); i2++) {
+            hashMap.put(headers.name(i2), headers.value(i2));
+        }
+        return hashMap;
+    }
+
+    public Response getHttpResponse() {
+        return this.httpResponse;
+    }
+
+    public int getStatusCode() {
+        return this.httpResponse.code();
+    }
+
+    public String getStatusText() {
+        return this.httpResponse.message();
+    }
+}

@@ -83,6 +83,9 @@ void TransformSample::init() {
 
     glEnable(GL_DEPTH_TEST);
 
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);

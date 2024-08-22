@@ -1,0 +1,17 @@
+package com.baidu.searchbox.video.collectionflow.detail.payment;
+
+import androidx.lifecycle.Observer;
+import kotlin.Unit;
+
+/* compiled from: D8$$SyntheticClass */
+public final /* synthetic */ class PaymentItemLayoutManager$$ExternalSyntheticLambda5 implements Observer {
+    public final /* synthetic */ PaymentItemLayoutManager f$0;
+
+    public /* synthetic */ PaymentItemLayoutManager$$ExternalSyntheticLambda5(PaymentItemLayoutManager paymentItemLayoutManager) {
+        this.f$0 = paymentItemLayoutManager;
+    }
+
+    public final void onChanged(Object obj) {
+        PaymentItemLayoutManager.m5175initManager$lambda9$lambda7(this.f$0, (Unit) obj);
+    }
+}

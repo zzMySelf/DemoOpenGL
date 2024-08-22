@@ -1,0 +1,53 @@
+package com.google.zxing;
+
+public final class InvertedLuminanceSource extends LuminanceSource {
+    public final LuminanceSource delegate;
+
+    public InvertedLuminanceSource(LuminanceSource luminanceSource) {
+        super(luminanceSource.getWidth(), luminanceSource.getHeight());
+        this.delegate = luminanceSource;
+    }
+
+    public LuminanceSource crop(int i2, int i3, int i4, int i5) {
+        return new InvertedLuminanceSource(this.delegate.crop(i2, i3, i4, i5));
+    }
+
+    public byte[] getMatrix() {
+        byte[] matrix = this.delegate.getMatrix();
+        int width = getWidth() * getHeight();
+        byte[] bArr = new byte[width];
+        for (int i2 = 0; i2 < width; i2++) {
+            bArr[i2] = (byte) (255 - (matrix[i2] & 255));
+        }
+        return bArr;
+    }
+
+    public byte[] getRow(int i2, byte[] bArr) {
+        byte[] row = this.delegate.getRow(i2, bArr);
+        int width = getWidth();
+        for (int i3 = 0; i3 < width; i3++) {
+            row[i3] = (byte) (255 - (row[i3] & 255));
+        }
+        return row;
+    }
+
+    public LuminanceSource invert() {
+        return this.delegate;
+    }
+
+    public boolean isCropSupported() {
+        return this.delegate.isCropSupported();
+    }
+
+    public boolean isRotateSupported() {
+        return this.delegate.isRotateSupported();
+    }
+
+    public LuminanceSource rotateCounterClockwise() {
+        return new InvertedLuminanceSource(this.delegate.rotateCounterClockwise());
+    }
+
+    public LuminanceSource rotateCounterClockwise45() {
+        return new InvertedLuminanceSource(this.delegate.rotateCounterClockwise45());
+    }
+}

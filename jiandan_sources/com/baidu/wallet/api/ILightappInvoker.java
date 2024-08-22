@@ -1,0 +1,11 @@
+package com.baidu.wallet.api;
+
+import android.content.Context;
+import com.baidu.apollon.NoProguard;
+import java.util.Set;
+
+public interface ILightappInvoker extends NoProguard {
+    Set<String> getMethodList();
+
+    void lightappInvoke(Context context, String str, ILightappInvokerCallback iLightappInvokerCallback);
+}

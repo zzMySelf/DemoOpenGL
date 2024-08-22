@@ -1,0 +1,10 @@
+package com.dxmbumptech.glide.manager;
+
+import android.content.Context;
+import androidx.annotation.NonNull;
+import com.dxmbumptech.glide.manager.ConnectivityMonitor;
+
+public interface ConnectivityMonitorFactory {
+    @NonNull
+    ConnectivityMonitor qw(@NonNull Context context, @NonNull ConnectivityMonitor.ConnectivityListener connectivityListener);
+}

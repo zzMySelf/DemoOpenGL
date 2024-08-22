@@ -1,0 +1,73 @@
+package com.baidu.sofire.ac;
+
+import android.content.Context;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.util.Pair;
+import java.util.Map;
+
+public interface FI {
+    byte[] ad(byte[] bArr, byte[] bArr2);
+
+    byte[] ae(byte[] bArr, byte[] bArr2);
+
+    boolean chh(Context context, String str);
+
+    void cm(String str, String str2, String str3, Callback callback, Class<?>[] clsArr, Object... objArr);
+
+    Pair<Integer, Object> cmsi(int i2, String str, Class<?>[] clsArr, Object... objArr);
+
+    boolean cp(Context context);
+
+    int fg();
+
+    Context gct();
+
+    SharedPreferences getCustomMutiProcessSharedPreferences(Context context, String str);
+
+    Pair<Boolean, DeviceInfoCallback> getDeviceInfoCallback();
+
+    SharedPreferences getPlatformPrivateSharedPreferences(Context context);
+
+    SharedPreferences getPlatformSharedSharedPreferences(Context context);
+
+    Map<Long, Throwable> gg();
+
+    Map<Long, Throwable> gi();
+
+    String gm(String str, String str2);
+
+    String goh(Context context);
+
+    String gom(Context context);
+
+    Map<Integer, String> gpd();
+
+    String gs(String str);
+
+    String gta(Context context);
+
+    String gzd(Context context);
+
+    String p(String str);
+
+    void r(String str, IntentFilter intentFilter, String str2, String str3);
+
+    byte[] rd(byte[] bArr, byte[] bArr2);
+
+    byte[] re(byte[] bArr, byte[] bArr2);
+
+    void rf(Context context);
+
+    void s(int i2, boolean z);
+
+    void sp(String str, boolean z);
+
+    void sse(Context context, String str, Map<String, Object> map, boolean z);
+
+    void sser(Context context, String str, Map<String, Object> map);
+
+    void u(String str);
+
+    void ur(String str, IntentFilter intentFilter, String str2, String str3);
+}

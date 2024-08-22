@@ -1,0 +1,5 @@
+package com.baidu.pyramid;
+
+public class swan_webviewcoverImage_updateScheme {
+    public static final String schemeDescription = "{\"args\":[{\"name\":\"gesture\",\"value\":\"string=\"},{\"name\":\"slaveId\",\"value\":\"string\"},{\"name\":\"hide\",\"value\":\"string=\"},{\"name\":\"viewId\",\"value\":\"string=\"},{\"name\":\"componentId\",\"value\":\"string=\"},{\"name\":\"parentId\",\"value\":\"string\"},{\"name\":\"position\",\"value\":\"Object=\"},{\"name\":\"style\",\"value\":\"Object=\"},{\"name\":\"src\",\"value\":\"string\"},{\"name\":\"loadState\",\"value\":\"boolean\"},{\"name\":\"transition\",\"value\":\"Object=\"},{\"name\":\"cb\",\"value\":\"string\"},{\"name\":\"fixedTop\",\"value\":\"string=\"},{\"name\":\"fixedRight\",\"value\":\"string=\"},{\"name\":\"fixedLeft\",\"value\":\"string=\"},{\"name\":\"fixedBottom\",\"value\":\"string=\"}],\"path\":\"/coverimage/update\",\"method\":\"Bdbox_android_jsbridge.dispatch\",\"authority\":\"swanAPI\",\"name\":\"coverImage.update\",\"invoke\":\"swan.method.url\"}";
+}

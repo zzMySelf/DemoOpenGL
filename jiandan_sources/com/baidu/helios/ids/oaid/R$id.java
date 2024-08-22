@@ -1,0 +1,4 @@
+package com.baidu.helios.ids.oaid;
+
+public final class R$id {
+}

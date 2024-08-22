@@ -1,0 +1,5 @@
+package com.baidu.pyramid;
+
+public class swan_v8llm_chatScheme {
+    public static final String schemeDescription = "{\"args\":[{\"name\":\"requestTimeout\",\"value\":\"number=\"},{\"name\":\"messages\",\"value\":{\"isRequired\":true,\"arrayOf\":{\"isRequired\":true,\"type\":{\"role\":\"string\",\"functionCall\":\"Object=\",\"name\":\"string=\",\"content\":\"string=\"}}}},{\"name\":\"model\",\"value\":\"string=\"},{\"name\":\"functions\",\"value\":{\"isRequired\":false,\"arrayOf\":{\"isRequired\":true,\"type\":{\"examples\":\"Array=\",\"name\":\"string\",\"description\":\"string\",\"responses\":\"string=\",\"parameters\":\"string\"}}}},{\"name\":\"temperature\",\"value\":\"number=\"},{\"name\":\"enableChunked\",\"value\":\"boolean=\"},{\"name\":\"system\",\"value\":\"string=\"},{\"name\":\"chatId\",\"value\":\"string=\"},{\"name\":\"cb\",\"value\":\"string\"}],\"path\":\"/llm/chat\",\"method\":\"_naSwan._naLLM.chat\",\"authority\":\"swanAPI\",\"name\":\"llm.chat\",\"invoke\":\"swan.method.jsonString\"}";
+}

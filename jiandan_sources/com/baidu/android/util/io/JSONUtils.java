@@ -1,0 +1,90 @@
+package com.baidu.android.util.io;
+
+import android.text.TextUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+@Deprecated
+public final class JSONUtils {
+    public static final boolean DEBUG = false;
+    public static final String TAG = "JSONUtils";
+
+    public static <T> T get(JSONObject jSONObject, String str, Class<T> cls) {
+        if (jSONObject == null) {
+            return null;
+        }
+        T opt = jSONObject.opt(str);
+        if (cls.isInstance(opt)) {
+            return opt;
+        }
+        return null;
+    }
+
+    public static boolean getBoolean(JSONObject jSONObject, String str, boolean z) {
+        Boolean bool = (Boolean) get(jSONObject, str, Boolean.class);
+        if (bool == null) {
+            return z;
+        }
+        return bool.booleanValue();
+    }
+
+    public static float getFloat(JSONObject jSONObject, String str, float f) {
+        return jSONObject == null ? f : (float) jSONObject.optDouble(str, (double) f);
+    }
+
+    public static int getInt(JSONObject jSONObject, String str, int i2) {
+        Class cls = Integer.class;
+        if (((Integer) get(jSONObject, str, cls)) == null) {
+            return i2;
+        }
+        return ((Integer) get(jSONObject, str, cls)).intValue();
+    }
+
+    public static String getIntOrString(JSONObject jSONObject, String str) {
+        Integer num = (Integer) get(jSONObject, str, Integer.class);
+        if (num == null) {
+            return (String) get(jSONObject, str, String.class);
+        }
+        return num.toString();
+    }
+
+    public static <T> T getItem(JSONArray jSONArray, int i2, Class<T> cls) {
+        T opt = jSONArray.opt(i2);
+        if (cls.isInstance(opt)) {
+            return opt;
+        }
+        return null;
+    }
+
+    public static JSONArray getJSONArray(JSONObject jSONObject, String str) {
+        return (JSONArray) get(jSONObject, str, JSONArray.class);
+    }
+
+    public static JSONObject getJSONObject(JSONObject jSONObject, String str) {
+        return (JSONObject) get(jSONObject, str, JSONObject.class);
+    }
+
+    public static JSONObject getJSONObjectItem(JSONArray jSONArray, int i2) {
+        return (JSONObject) getItem(jSONArray, i2, JSONObject.class);
+    }
+
+    public static String getString(JSONObject jSONObject, String str) {
+        return (String) get(jSONObject, str, String.class);
+    }
+
+    public static JSONObject parseString(String str) {
+        if (TextUtils.isEmpty(str)) {
+            return new JSONObject();
+        }
+        try {
+            return new JSONObject(str);
+        } catch (JSONException unused) {
+            return new JSONObject();
+        }
+    }
+
+    public static Object get(JSONObject jSONObject, String str) {
+        return get(jSONObject, str, Object.class);
+    }
+}

@@ -1,7 +1,11 @@
 package com.baidu.demoopengl
 
+import android.graphics.PixelFormat
+import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
 import android.widget.Button
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.baidu.demoopengl.opengl.MainActivity
 import com.baidu.demoopengl.video.Camera2Activity
@@ -29,6 +33,30 @@ class RouterActivity : AppCompatActivity() {
         }
 
         copyAssertShaderToSdcard()
+
+
+
+        findViewById<Button>(R.id.window_dialog).setOnClickListener {
+            val floatView = TextView(this).apply {
+                text = "哈哈哈哈哈哈悬浮球"
+            }
+            val layoutFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG
+            } else {
+                WindowManager.LayoutParams.TYPE_PHONE
+            }
+            val params = WindowManager.LayoutParams(
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,
+                layoutFlag,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                        or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT
+            )
+            params.token = window.decorView.windowToken
+            windowManager.addView(floatView, params)
+        }
     }
 
     companion object {

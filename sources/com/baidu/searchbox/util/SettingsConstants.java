@@ -1,0 +1,42 @@
+package com.baidu.searchbox.util;
+
+public class SettingsConstants {
+    public static final String ADBLOCK_KEY_FROM = "from";
+    public static final String ADBLOCK_KEY_TYPE = "type";
+    public static final String ADBLOCK_VALUE_TOOL = "tool";
+    public static final String INTRODUCE_URL = "https://jing.baidu.com/h5/aboutmbaidu.html";
+    public static final String KEY_DEVELOPMENT_SETTINGS = "development_settings";
+    public static final String KEY_SETTING_PERSONAL_DISPLAY = "key_setting_personal_display";
+    public static final String KEY_VIDEO_AUTO_PLAY_SWITCH = "key_video_auto_play_switch";
+    public static final String NOTIFICATION_FAST_OPEN_SWITCH = "fast_open_url";
+    public static final String PREF_LOCKSCREEN_STATE_ENABLE = "1";
+    public static final String PREF_LOCKSCREEN_STATE_KEY = "pref_lock_screen_state";
+    public static final String PREF_LOCKSCREEN_STATE_UNABLE = "0";
+    public static final String SETTING_PAGE_EVENT_ID = "283";
+    public static final String T5_PLUGIN_SETTINGS = "017301";
+    public static final String UBC_ACCOUNT = "727";
+    public static final String UBC_ACCOUNT_FROM = "account";
+    public static final String UBC_ACCOUNT_SOURCE_LOGOUT = "logout";
+    public static final String UBC_ACCOUNT_SOURCE_SWITCH = "switch";
+    public static final String UBC_ACCOUNT_TYPE_CLICK = "click";
+    public static final String UBC_ACCOUNT_TYPE_SUCCESS = "success";
+    public static final String UBC_FONT_SIZE_VALUE_ID = "277";
+    public static final String UBC_FONT_SIZE_VALUE_KEY = "value";
+    public static final String UBC_FROM_BASE = "base";
+    public static final String UBC_HEPL_AND_FEEDBACK_CLICK_ID = "495";
+    public static final String UBC_LOGOUT = "769";
+    public static final String UBC_NOTIFICATION_FAST_SEARCH = "738";
+    public static final String UBC_PAGE_SETTINGS = "shezhi";
+    public static final String UBC_PAGE_TRANSLATION = "autotrans";
+    public static final String UBC_PRIVATE_INDIVIDUAL = "private_individual";
+    public static final String UBC_PRIVATE_SWITCH = "private_switch";
+    public static final String UBC_RECOMMEND_ALERT_DIALOG_CLICK_ID = "1329";
+    public static final String UBC_RECOMMEND_ALERT_DIALOG_SHOW_ID = "1328";
+    public static final String UBC_SETTING_CENTER_ID = "534";
+    public static final String UBC_TYPE_CLOSE = "close";
+    public static final String UBC_TYPE_ENTER = "enter";
+    public static final String UBC_TYPE_OPEN = "open";
+    public static final String UBC_VALUE_SERVICE_PHONE = "service_telephone";
+    public static final String UTF_8 = "UTF-8";
+    public static final String VALUE_SETTING_ENTRANCE = "entrance_clk";
+}

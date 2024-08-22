@@ -1,0 +1,27 @@
+package com.baidu.searchbox.video.feedflow.detail.lazy.features;
+
+import com.baidu.searchbox.feed.detail.arch.ext.CommonState;
+import com.baidu.searchbox.feed.detail.frame.Action;
+import com.baidu.searchbox.video.component.reward.RewardCompleteAction;
+import com.baidu.searchbox.video.feedflow.common.downgrade.DowngradeFeatureWrap;
+import com.baidu.searchbox.video.feedflow.detail.lazy.VideoItemLazyInflateState;
+import kotlin.Metadata;
+import kotlin.jvm.internal.Intrinsics;
+
+@Metadata(d1 = {"\u0000$\n\u0002\u0018\u0002\n\u0002\u0018\u0002\n\u0002\b\u0002\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000b\n\u0000\u0018\u00002\u00020\u0001B\u0005¢\u0006\u0002\u0010\u0002J\u0018\u0010\u0003\u001a\u00020\u00042\u0006\u0010\u0005\u001a\u00020\u00062\u0006\u0010\u0007\u001a\u00020\bH\u0016J\u0010\u0010\t\u001a\u00020\n2\u0006\u0010\u0007\u001a\u00020\bH\u0016¨\u0006\u000b"}, d2 = {"Lcom/baidu/searchbox/video/feedflow/detail/lazy/features/RewardBubbleFeature;", "Lcom/baidu/searchbox/video/feedflow/common/downgrade/DowngradeFeatureWrap;", "()V", "apply", "", "state", "Lcom/baidu/searchbox/feed/detail/arch/ext/CommonState;", "action", "Lcom/baidu/searchbox/feed/detail/frame/Action;", "canApply", "", "lib-flow-component_release"}, k = 1, mv = {1, 6, 0}, xi = 48)
+/* compiled from: RewardBubbleFeature.kt */
+public final class RewardBubbleFeature extends DowngradeFeatureWrap {
+    public boolean canApply(Action action) {
+        Intrinsics.checkNotNullParameter(action, "action");
+        return action instanceof RewardCompleteAction;
+    }
+
+    public void apply(CommonState state, Action action) {
+        Intrinsics.checkNotNullParameter(state, "state");
+        Intrinsics.checkNotNullParameter(action, "action");
+        VideoItemLazyInflateState videoItemLazyInflateState = (VideoItemLazyInflateState) state.select(VideoItemLazyInflateState.class);
+        if (videoItemLazyInflateState != null) {
+            videoItemLazyInflateState.triggerInflateRewardBubble$lib_flow_component_release();
+        }
+    }
+}

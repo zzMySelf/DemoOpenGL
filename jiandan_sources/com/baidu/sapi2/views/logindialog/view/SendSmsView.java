@@ -1,0 +1,203 @@
+package com.baidu.sapi2.views.logindialog.view;
+
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Color;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.annotation.Nullable;
+import com.baidu.aiscan.R;
+import com.baidu.sapi2.SapiAccountManager;
+import com.baidu.sapi2.callback.GetDynamicPwdCallback;
+import com.baidu.sapi2.result.GetDynamicPwdResult;
+import com.baidu.sapi2.utils.ToastUtil;
+import com.baidu.sapi2.views.logindialog.interf.ILoginConfirmCallback;
+import com.baidu.sapi2.views.logindialog.interf.ISendSmsCallback;
+import com.baidu.sapi2.views.logindialog.interf.ISendSmsUICallback;
+import java.util.HashMap;
+
+public class SendSmsView extends LinearLayout {
+
+    /* renamed from: i  reason: collision with root package name */
+    public static final String f985i = "sdk_situation";
+    public static final String j = "pop_login";
+    public static final String k = "skipreg";
+    public Context a;
+    public EditText b;
+    public ImageView c;
+    public TextView d;
+    public TextView e;
+    public ISendSmsCallback f;
+    public ILoginConfirmCallback g;
+    public ISendSmsUICallback h;
+
+    public class a implements View.OnClickListener {
+        public a() {
+        }
+
+        public void onClick(View view) {
+            SendSmsView.this.b.setText("");
+        }
+    }
+
+    public class b implements TextWatcher {
+        public b() {
+        }
+
+        public void afterTextChanged(Editable editable) {
+            String trim = editable.toString().trim();
+            if (TextUtils.isEmpty(trim) || trim.length() == 0) {
+                SendSmsView.this.c.setVisibility(8);
+                SendSmsView.this.d.setVisibility(8);
+                SendSmsView.this.h.onShowThirdParty();
+            } else {
+                SendSmsView.this.c.setVisibility(0);
+                SendSmsView.this.d.setVisibility(0);
+                SendSmsView.this.h.onHideThirdParty();
+            }
+            SendSmsView.this.h.onHideErrorTip();
+        }
+
+        public void beforeTextChanged(CharSequence charSequence, int i2, int i3, int i4) {
+        }
+
+        public void onTextChanged(CharSequence charSequence, int i2, int i3, int i4) {
+        }
+    }
+
+    public class c implements View.OnClickListener {
+
+        public class a implements Runnable {
+            public a() {
+            }
+
+            public void run() {
+                String trim = SendSmsView.this.b.getText().toString().trim();
+                if (TextUtils.isEmpty(trim) || trim.length() != 11) {
+                    ToastUtil.show("请您输入正确的手机号");
+                } else {
+                    SendSmsView.this.b(trim);
+                }
+            }
+        }
+
+        public c() {
+        }
+
+        public void onClick(View view) {
+            if (SendSmsView.this.f != null) {
+                SendSmsView.this.g.onPostLogin(false, new a());
+            }
+        }
+    }
+
+    public SendSmsView(Context context) {
+        this(context, (AttributeSet) null);
+    }
+
+    public TextView getTvSendSms() {
+        return this.d;
+    }
+
+    public SendSmsView(Context context, @Nullable AttributeSet attributeSet) {
+        this(context, attributeSet, 0);
+    }
+
+    /* access modifiers changed from: private */
+    public void b(final String str) {
+        HashMap hashMap = new HashMap();
+        hashMap.put("sdk_situation", "pop_login");
+        hashMap.put("skipreg", "1");
+        final long currentTimeMillis = System.currentTimeMillis();
+        SapiAccountManager.getInstance().getAccountService().getDynamicPwd(new GetDynamicPwdCallback() {
+            public void onFinish() {
+            }
+
+            public void onStart() {
+            }
+
+            public void onCaptchaRequired(GetDynamicPwdResult getDynamicPwdResult) {
+                com.baidu.sapi2.views.logindialog.utils.a.a("get_sms_code", System.currentTimeMillis() - currentTimeMillis, getDynamicPwdResult.getResultCode(), getDynamicPwdResult.getResultMsg());
+                if (SendSmsView.this.f != null) {
+                    SendSmsView.this.f.onSendSmsFailure(str, getDynamicPwdResult);
+                }
+            }
+
+            public void onFailure(GetDynamicPwdResult getDynamicPwdResult) {
+                com.baidu.sapi2.views.logindialog.utils.a.a("get_sms_code", System.currentTimeMillis() - currentTimeMillis, getDynamicPwdResult.getResultCode(), getDynamicPwdResult.getResultMsg());
+                if (SendSmsView.this.f != null) {
+                    SendSmsView.this.f.onSendSmsFailure(str, getDynamicPwdResult);
+                }
+            }
+
+            public void onSuccess(GetDynamicPwdResult getDynamicPwdResult) {
+                com.baidu.sapi2.views.logindialog.utils.a.a("get_sms_code", System.currentTimeMillis() - currentTimeMillis, getDynamicPwdResult.getResultCode(), getDynamicPwdResult.getResultMsg());
+                if (SendSmsView.this.f == null) {
+                    return;
+                }
+                if (getDynamicPwdResult.getResultCode() != 0) {
+                    SendSmsView.this.f.onSendSmsFailure(str, getDynamicPwdResult);
+                } else {
+                    SendSmsView.this.f.onSendSmsSuccess(true, str, getDynamicPwdResult);
+                }
+            }
+        }, str, (String) null, hashMap);
+    }
+
+    private void c() {
+        LayoutInflater.from(this.a).inflate(R.layout.layout_sapi_dialog_quick_login_send_sms, this);
+        setOrientation(1);
+        this.b = (EditText) findViewById(R.id.sapi_sdk_et_login_dialog_phone_input);
+        this.c = (ImageView) findViewById(R.id.sapi_sdk_iv_login_dialog_phone_clear);
+        this.d = (TextView) findViewById(R.id.sapi_sdk_tv_login_dialog_send_sms);
+        this.e = (TextView) findViewById(R.id.sapi_sdk_tv_error_tip);
+        this.c.setOnClickListener(new a());
+        this.b.addTextChangedListener(new b());
+        this.d.setOnClickListener(new c());
+    }
+
+    public SendSmsView(Context context, @Nullable AttributeSet attributeSet, int i2) {
+        super(context, attributeSet, i2);
+        this.a = context;
+        c();
+    }
+
+    public void a(ILoginConfirmCallback iLoginConfirmCallback, ISendSmsCallback iSendSmsCallback, ISendSmsUICallback iSendSmsUICallback) {
+        this.g = iLoginConfirmCallback;
+        this.f = iSendSmsCallback;
+        this.h = iSendSmsUICallback;
+    }
+
+    public void a() {
+        this.b.setTextColor(Color.parseColor("#CCFFFFFF"));
+        this.b.setBackgroundDrawable(this.a.getResources().getDrawable(R.drawable.pass_quick_login_dialog_sms_input_bg_dark));
+    }
+
+    public void b() {
+        this.e.setVisibility(8);
+    }
+
+    public void a(String str) {
+        this.e.setText(str);
+        this.e.setVisibility(0);
+    }
+
+    public void a(Activity activity) {
+        EditText editText = this.b;
+        if (editText != null) {
+            editText.setFocusable(true);
+            this.b.setFocusableInTouchMode(true);
+            this.b.requestFocus();
+            ((InputMethodManager) activity.getSystemService("input_method")).showSoftInput(this.b, 0);
+        }
+    }
+}
