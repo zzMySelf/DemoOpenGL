@@ -1,5 +1,0 @@
-package com.baidu.pyramid;
-
-public class swan_webviewvoicePanel_insertScheme {
-    public static final String schemeDescription = "{\"args\":[{\"name\":\"slaveId\",\"value\":\"string\"},{\"name\":\"viewId\",\"value\":\"string=\"},{\"name\":\"componentId\",\"value\":\"string=\"},{\"name\":\"parentId\",\"value\":\"string\"},{\"name\":\"hide\",\"value\":\"string\"},{\"name\":\"gesture\",\"value\":\"string\"},{\"name\":\"position\",\"value\":\"Object\"},{\"name\":\"style\",\"value\":\"Object\"},{\"name\":\"text\",\"value\":\"string\"},{\"name\":\"scrollTop\",\"value\":\"string\"},{\"name\":\"fixedTop\",\"value\":\"string=\"},{\"name\":\"fixedRight\",\"value\":\"string=\"},{\"name\":\"fixedLeft\",\"value\":\"string=\"},{\"name\":\"fixedBottom\",\"value\":\"string=\"},{\"name\":\"showVoicePanelOnLongPress\",\"value\":\"boolean=\"},{\"name\":\"buttonAnimation\",\"value\":\"string=\"},{\"name\":\"cb\",\"value\":\"string\"}],\"path\":\"/voicepanel/insert\",\"method\":\"Bdbox_android_jsbridge.dispatch\",\"authority\":\"swanAPI\",\"name\":\"voicePanel.insert\",\"invoke\":\"swan.method.url\"}";
-}

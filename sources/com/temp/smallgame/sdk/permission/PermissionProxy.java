@@ -1,8 +1,0 @@
-package com.temp.smallgame.sdk.permission;
-
-public interface PermissionProxy {
-    public static final String SCOPE_ID_CAMERA = "mapp_camera";
-    public static final String SCOPE_ID_RECORD = "mapp_record";
-
-    void requestPermission(String str, PermissionListener permissionListener);
-}
