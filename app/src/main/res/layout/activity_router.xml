@@ -31,10 +31,10 @@
         android:layout_height="wrap_content"
         android:text="增加window dialog" />
 
-    <com.baidu.demoopengl.CustomProgressView
-        android:id="@+id/customProgressView"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"/>
+<!--    <com.baidu.demoopengl.CustomProgressView-->
+<!--        android:id="@+id/customProgressView"-->
+<!--        android:layout_width="200dp"-->
+<!--        android:layout_height="200dp"-->
+<!--        android:layout_gravity="center"/>-->
 
 </LinearLayout>
