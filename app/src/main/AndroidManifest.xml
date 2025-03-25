@@ -3,23 +3,17 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature android:name="android.hardware.camera" />
-    <uses-feature
-        android:glEsVersion="0x00020000"
-        android:required="true" />
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.VIBRATE" />
-
-    <!--  适配target33 增加权限  -->
+    <uses-permission android:name="android.permission.VIBRATE" /> <!-- 适配target33 增加权限 -->
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <uses-feature
         android:glEsVersion="0x00030000"
@@ -35,6 +29,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DemoOpenGL"
         tools:targetApi="31">
+        <activity
+            android:name=".opencv.PictureFrameActivity"
+            android:theme="@style/Theme.DemoOpenGL.FullScreen"
+            android:exported="false" />
         <activity
             android:name=".video.Camera2Activity"
             android:exported="false"

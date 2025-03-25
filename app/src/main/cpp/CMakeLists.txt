@@ -9,6 +9,9 @@ cmake_minimum_required(VERSION 3.18.1)
 
 project("demoopengl")
 
+set(OPENCV_LIBS_DIR ${CMAKE_SOURCE_DIR}/../opencv_include)
+set(OPENCV_LIBS ${CMAKE_SOURCE_DIR}/../opencv_lib)
+
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
@@ -17,6 +20,7 @@ project("demoopengl")
 include_directories(
         demo
         demo/glm
+        ${OPENCV_LIBS_DIR}
 )
 file(GLOB CPP_SOURCES
         demo/*.cpp
@@ -35,6 +39,11 @@ add_library( # Sets the name of the library.
 
         ${CPP_SOURCES}
         )
+
+add_library(libopencv_java4 SHARED IMPORTED)
+set_target_properties(libopencv_java4 PROPERTIES IMPORTED_LOCATION
+        ${OPENCV_LIBS}/${ANDROID_ABI}/libopencv_java4.so)
+
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -63,4 +72,7 @@ target_link_libraries( # Specifies the target library.
         EGL
         GLESv3
         android
+
+        jnigraphics
+        libopencv_java4
         )

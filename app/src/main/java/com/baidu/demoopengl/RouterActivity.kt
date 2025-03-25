@@ -6,10 +6,13 @@ import android.os.Bundle
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.baidu.demoopengl.opencv.PictureFrameActivity
 import com.baidu.demoopengl.opengl.MainActivity
 import com.baidu.demoopengl.video.Camera2Activity
 import com.baidu.demoopengl.video.MediaRecorderActivity
+import org.opencv.android.OpenCVLoader
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -56,6 +59,14 @@ class RouterActivity : AppCompatActivity() {
             )
             params.token = window.decorView.windowToken
             windowManager.addView(floatView, params)
+        }
+
+        if (OpenCVLoader.initDebug()) {
+            Toast.makeText(this, "openCV 加载成功", Toast.LENGTH_LONG).show()
+        }
+
+        findViewById<Button>(R.id.opencv_picture_frame).setOnClickListener {
+            PictureFrameActivity.start(this@RouterActivity)
         }
     }
 

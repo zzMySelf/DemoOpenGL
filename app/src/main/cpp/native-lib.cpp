@@ -1,6 +1,12 @@
 #include <jni.h>
 #include <string>
+#include <android/log.h>
 #include <MyGLRenderContext.h>
+
+#include <android/bitmap.h>
+#include <opencv2/opencv.hpp>
+
+using namespace cv;
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_baidu_demoopengl_opengl_MainActivity_stringFromJNI(
@@ -77,4 +83,40 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1SetRenderType(JNIEnv *env, jobject thiz, jint type) {
     MyGLRenderContext::getInstance()->setRenderType(type);
+}
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1blur_1bitmap(JNIEnv *env, jobject thiz, jobject bitmap) {
+    if (bitmap == nullptr) {
+        __android_log_print(ANDROID_LOG_ERROR, "NativeBlur", "bitmap is null!");
+        return;
+    }
+
+    AndroidBitmapInfo info;
+    if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) {
+        __android_log_print(ANDROID_LOG_ERROR, "NativeBlur", "AndroidBitmap_getInfo failed!");
+        return;
+    }
+
+    if (info.format != ANDROID_BITMAP_FORMAT_RGBA_8888 && info.format != ANDROID_BITMAP_FORMAT_RGB_565) {
+        __android_log_print(ANDROID_LOG_ERROR, "NativeBlur", "Unsupported bitmap format: %d", info.format);
+        return;
+    }
+
+    void *pixels;
+    if (AndroidBitmap_lockPixels(env, bitmap, &pixels) < 0) {
+        __android_log_print(ANDROID_LOG_ERROR, "NativeBlur", "AndroidBitmap_lockPixels failed!");
+        return;
+    }
+
+    if (pixels == nullptr) {
+        __android_log_print(ANDROID_LOG_ERROR, "NativeBlur", "pixels is null!");
+        AndroidBitmap_unlockPixels(env, bitmap);
+        return;
+    }
+
+    Mat image(info.height, info.width, CV_8UC4, pixels);
+    GaussianBlur(image, image, Size(101, 101), 0);
+
+    AndroidBitmap_unlockPixels(env, bitmap);
 }

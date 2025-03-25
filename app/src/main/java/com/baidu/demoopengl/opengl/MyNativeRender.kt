@@ -1,5 +1,7 @@
 package com.baidu.demoopengl.opengl
 
+import android.graphics.Bitmap
+
 /**
  * Day：2023/9/14 19:24
  * @author zhangyelei
@@ -26,4 +28,6 @@ class MyNativeRender {
     external fun native_OnDrawFrame()
 
     external fun native_SetRenderType(type: Int)
+
+    external fun native_blur_bitmap(bitmap: Bitmap)
 }
