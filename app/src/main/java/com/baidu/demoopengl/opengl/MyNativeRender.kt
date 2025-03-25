@@ -29,5 +29,7 @@ class MyNativeRender {
 
     external fun native_SetRenderType(type: Int)
 
-    external fun native_blur_bitmap(bitmap: Bitmap)
+    external fun native_addRoundedCorners(bitmap: Bitmap, shadowSize: Int, cornerRadius: Int)
+
+    external fun native_blurBitmap(bitmap: Bitmap)
 }

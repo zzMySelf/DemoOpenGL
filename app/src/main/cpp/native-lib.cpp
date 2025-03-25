@@ -5,8 +5,74 @@
 
 #include <android/bitmap.h>
 #include <opencv2/opencv.hpp>
+#include "OpenCVUtil.h"
 
 using namespace cv;
+
+void bitmapToMat(JNIEnv *env, jobject bitmap, cv::Mat &mat) {
+    AndroidBitmapInfo info;
+    void *pixels = nullptr;
+
+    // 获取 Bitmap 信息
+    if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) {
+        __android_log_print(ANDROID_LOG_ERROR, "opencv", "bitmapToMat Failed to get Bitmap info");
+        return;
+    }
+
+    // 锁定 Bitmap 获取像素数据
+    if (AndroidBitmap_lockPixels(env, bitmap, &pixels) < 0) {
+        __android_log_print(ANDROID_LOG_ERROR, "opencv", "bitmapToMat Failed to lock pixels");
+        return;
+    }
+
+    if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        // 确保 Mat 为 CV_8UC4 类型，直接使用 RGBA 格式
+        mat = cv::Mat(info.height, info.width, CV_8UC4, pixels);
+    } else if (info.format == ANDROID_BITMAP_FORMAT_RGB_565) {
+        // 对于 RGB_565 格式，需要转为 RGBA 格式
+        mat = cv::Mat(info.height, info.width, CV_8UC2, pixels);
+        cv::cvtColor(mat, mat, cv::COLOR_BGR5652RGBA);  // 转换为 RGBA
+    } else {
+        __android_log_print(ANDROID_LOG_ERROR, "opencv", "bitmapToMat Unsupported Bitmap format");
+        mat.release();  // 清空 mat
+    }
+
+    // 解锁 Bitmap
+    AndroidBitmap_unlockPixels(env, bitmap);
+    __android_log_print(ANDROID_LOG_DEBUG, "opencv", "bitmapToMat Mat size: %dx%d, type: %d", mat.cols, mat.rows, mat.type());
+}
+
+void matToBitmap(JNIEnv *env, cv::Mat &mat, jobject bitmap) {AndroidBitmapInfo info;
+    void *pixels = nullptr;
+
+    // 获取 Bitmap 信息
+    if (AndroidBitmap_getInfo(env, bitmap, &info) < 0) {
+        __android_log_print(ANDROID_LOG_ERROR, "opencv", "matToBitmap Failed to get Bitmap info");
+        return;
+    }
+
+    // 锁定 Bitmap 获取像素数据
+    if (AndroidBitmap_lockPixels(env, bitmap, &pixels) < 0) {
+        __android_log_print(ANDROID_LOG_ERROR, "opencv", "matToBitmap Failed to lock pixels");
+        return;
+    }
+
+    if (info.format == ANDROID_BITMAP_FORMAT_RGBA_8888) {
+        // 如果 Bitmap 是 RGBA 格式，则直接复制数据
+        cv::Mat tmp(info.height, info.width, CV_8UC4, pixels);
+        mat.copyTo(tmp);
+    } else if (info.format == ANDROID_BITMAP_FORMAT_RGB_565) {
+        // 如果 Bitmap 是 RGB_565 格式，则需要转换为 RGB_565 格式
+        cv::Mat tmp;
+        cv::cvtColor(mat, tmp, cv::COLOR_RGBA2BGR565);  // 转换 RGBA -> RGB565
+        memcpy(pixels, tmp.data, info.height * info.width * 2);  // 拷贝数据
+    }
+
+    // 解锁 Bitmap
+    AndroidBitmap_unlockPixels(env, bitmap);
+    __android_log_print(ANDROID_LOG_DEBUG, "opencv", "matToBitmap Mat size: %dx%d, type: %d", mat.cols, mat.rows, mat.type());
+}
+
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_baidu_demoopengl_opengl_MainActivity_stringFromJNI(
@@ -86,7 +152,7 @@ Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1SetRenderType(JNIEnv *en
 }
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1blur_1bitmap(JNIEnv *env, jobject thiz, jobject bitmap) {
+Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1blurBitmap(JNIEnv *env, jobject thiz, jobject bitmap) {
     if (bitmap == nullptr) {
         __android_log_print(ANDROID_LOG_ERROR, "NativeBlur", "bitmap is null!");
         return;
@@ -120,3 +186,26 @@ Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1blur_1bitmap(JNIEnv *env
 
     AndroidBitmap_unlockPixels(env, bitmap);
 }
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_baidu_demoopengl_opengl_MyNativeRender_native_1addRoundedCorners(
+        JNIEnv *env,
+        jobject thiz,
+        jobject bitmap,
+        jint shadowSize,
+        jint cornerRadius) {
+
+    // 将 bitmap 转换为 OpenCV Mat
+    Mat src;
+    bitmapToMat(env, bitmap, src);
+
+    Mat result = addRoundedCorners(src, cornerRadius, shadowSize);
+
+    // 将最终结果回写到 bitmap
+    matToBitmap(env, result, bitmap);
+}
+
+
+
+
+
