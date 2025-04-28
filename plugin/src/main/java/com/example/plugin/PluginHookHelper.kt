@@ -2,11 +2,18 @@ package com.example.plugin
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.os.Build
 import android.os.Handler
 import android.os.Message
+import android.os.Process
+import android.util.ArrayMap
 import android.util.Log
+import java.io.File
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
@@ -82,7 +89,41 @@ object PluginHookHelper {
         }
     }
 
+    @SuppressLint("PrivateApi")
+    private fun replaceAfter9(msg: Message) {
+        try {
+            val mActivityCallbacksField = msg.obj.javaClass.getDeclaredField("mActivityCallbacks")
+            mActivityCallbacksField.isAccessible = true
 
+            val mActivityCallbacks = mActivityCallbacksField.get(msg.obj) as List<*>
+            for (i in mActivityCallbacks.indices) {
+                if (mActivityCallbacks[i]?.javaClass?.name.equals("android.app.servertransaction.LaunchActivityItem")) {
+                    val launchActivityItem = mActivityCallbacks[i]
+
+                    // 替换loadedApk中的classloader
+                    Log.e("zyl", "开始替换loadedApk中的classloader")
+                    val apkPath = File(App.baseContext()?.getExternalFilesDir(null), "debug-plugin.apk").absolutePath
+                    val launchActivityItemClass = Class.forName("android.app.servertransaction.LaunchActivityItem")
+                    if (launchActivityItem != null) {
+                        replaceClassloader(apkPath, launchActivityItemClass, launchActivityItem)
+                    }
+                    Log.e("zyl", "完成替换loadedApk中的classloader")
+
+                    val mIntentField = launchActivityItem?.javaClass?.getDeclaredField("mIntent")
+                    mIntentField?.isAccessible = true
+
+                    val proxyIntent = mIntentField?.get(launchActivityItem) as Intent
+                    val intent = proxyIntent.getParcelableExtra<Intent>(TARGET_INTENT)
+                    intent?.let {
+                        Log.w("zyl", "hook replaceAfter9 替换成功")
+                        mIntentField.set(launchActivityItem, intent)
+                    }
+                }
+            }
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+    }
 
     @SuppressLint("PrivateApi")
     private fun hookIActivityManager() {
@@ -190,25 +231,144 @@ object PluginHookHelper {
         }
     }
 
-    private fun replaceAfter9(msg: Message) {
+    private fun getApplicationInfoByPackageArchiveInfo(pluginPath: String): ApplicationInfo? {
+        // 根据插件apk路径生成对应的PackageInfo对象
+        val packageManager = App.baseContext()?.packageManager
+        if (packageManager == null) {
+            Log.i("zyl", "get PackageManager failed")
+            return null
+        }
+
+        val packageInfo = packageManager.getPackageArchiveInfo(pluginPath, 0)
+        if (packageInfo == null) {
+            Log.i("zyl", "get packageInfo failed")
+            return null
+        }
+        return packageInfo.applicationInfo
+    }
+
+    private fun generateApplicationInfo(pluginPath: String): ApplicationInfo? {
+        return try {
+            val applicationInfo = getApplicationInfoByPackageArchiveInfo(pluginPath)
+            if (applicationInfo == null) {
+                Log.i("zyl", "get applicationInfo failed")
+                return null
+            }
+            // 设置资源加载路径
+            applicationInfo.sourceDir = pluginPath
+            applicationInfo.publicSourceDir = pluginPath
+            // 设置隶属于哪一个 uid
+            applicationInfo.uid = Process.myUid()
+            applicationInfo
+        } catch (e: Exception) {
+            Log.i("zyl", "generateApplicationInfo failed: ${e.message}")
+            null
+        }
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun replaceClassloader(pluginPath: String, mLaunchActivityItemCls: Class<*>, obj: Any) {
+        // 获取到 ActivityThread 对象
+        val activityThreadClass = Class.forName("android.app.ActivityThread")
+        val sCurrentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread")
+        sCurrentActivityThreadField.isAccessible = true
+        val sCurrentActivityThread = sCurrentActivityThreadField.get(null)
+
+        // 获取 mPackages
+        val mPackagesField = activityThreadClass.getDeclaredField("mPackages")
+        mPackagesField.isAccessible = true
+        val mPackages = mPackagesField.get(sCurrentActivityThread) as? ArrayMap<*, *>
+        if (mPackages == null) {
+            Log.i(TAG, "can not get mPackages")
+            return
+        }
+
+        // 获取插件 ApplicationInfo
+        val applicationInfo = generateApplicationInfo(pluginPath)
+        if (applicationInfo != null) {
+            // 获取 CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO
+            val compatibilityInfoClass = Class.forName("android.content.res.CompatibilityInfo")
+            val defaultCompatibilityInfoField = compatibilityInfoClass.getDeclaredField("DEFAULT_COMPATIBILITY_INFO")
+            defaultCompatibilityInfoField.isAccessible = true
+            val defaultCompatibilityInfo = defaultCompatibilityInfoField.get(null)
+
+            // 调用 getPackageInfo 方法
+            val getPackageInfoMethod = activityThreadClass.getDeclaredMethod(
+                "getPackageInfo",
+                ApplicationInfo::class.java,
+                compatibilityInfoClass,
+                Int::class.javaPrimitiveType
+            )
+            getPackageInfoMethod.isAccessible = true
+            val loadedApk = getPackageInfoMethod.invoke(
+                sCurrentActivityThread, applicationInfo, defaultCompatibilityInfo, Context.CONTEXT_INCLUDE_CODE
+            )
+
+            val pluginPkgName = applicationInfo.packageName
+            if (!pluginPkgName.isNullOrEmpty()) {
+                Log.i(TAG, "plugin pkg name is $pluginPkgName")
+                // 替换 ActivityInfo 中包名
+                replacePkgName(mLaunchActivityItemCls, obj, pluginPkgName)
+                // 设置 ClassLoader
+                setClassloader(loadedApk!!)
+            } else {
+                Log.i(TAG, "get plugin pkg name failed")
+            }
+        } else {
+            Log.i(TAG, "can not get application info")
+        }
+    }
+
+    @Throws(Exception::class)
+    private fun replacePkgName(mLaunchActivityItemCls: Class<*>, obj: Any, pkgName: String) {
+        val mInfoField = mLaunchActivityItemCls.getDeclaredField("mInfo")
+        mInfoField.isAccessible = true
+        val activityInfo = mInfoField.get(obj) as ActivityInfo
+        activityInfo.applicationInfo.packageName = pkgName
+    }
+
+    @Throws(Exception::class)
+    private fun setClassloader(loadedApk: Any) {
+        val dexClassLoader = PluginLoadManager.pluginClassLoader
+        val mClassLoaderField = loadedApk.javaClass.getDeclaredField("mClassLoader")
+        mClassLoaderField.isAccessible = true
+        mClassLoaderField.set(loadedApk, dexClassLoader)
+    }
+
+    @SuppressLint("PrivateApi")
+    fun hookPackageManager() {
         try {
-            val mActivityCallbacksField = msg.obj.javaClass.getDeclaredField("mActivityCallbacks")
-            mActivityCallbacksField.isAccessible = true
+            val activityThreadClass = Class.forName("android.app.ActivityThread")
+            val currentActivityThreadField = activityThreadClass.getDeclaredField("sCurrentActivityThread")
+            currentActivityThreadField.isAccessible = true
+            val currentActivityThread = currentActivityThreadField.get(null)
 
-            val mActivityCallbacks = mActivityCallbacksField.get(msg.obj) as List<*>
-            for (i in mActivityCallbacks.indices) {
-                if (mActivityCallbacks[i]?.javaClass?.name.equals("android.app.servertransaction.LaunchActivityItem")) {
-                    val launchActivityItem = mActivityCallbacks[i]
-                    val mIntentField = launchActivityItem?.javaClass?.getDeclaredField("mIntent")
-                    mIntentField?.isAccessible = true
+            val packageManagerField = activityThreadClass.getDeclaredField("sPackageManager")
+            packageManagerField.isAccessible = true
+            val sPackageManager = packageManagerField.get(currentActivityThread)
 
-                    val proxyIntent = mIntentField?.get(launchActivityItem) as Intent
-                    val intent = proxyIntent.getParcelableExtra<Intent>(TARGET_INTENT)
-                    intent?.let {
-                        mIntentField.set(launchActivityItem, intent)
+            val iPackageManagerInterface = Class.forName("android.content.pm.IPackageManager")
+
+            val proxy = Proxy.newProxyInstance(
+                iPackageManagerInterface.classLoader,
+                arrayOf(iPackageManagerInterface)
+            ) { proxy, method, args ->
+                if (method.name == "getPackageInfo") {
+                    val packageName = args?.get(0) as? String
+                    if (packageName == PLUGIN_PKG) {
+                        // 是插件的包名，返回一个假的 PackageInfo
+                        val packageInfo = PackageInfo()
+                        packageInfo.packageName = PLUGIN_PKG
+                        return@newProxyInstance packageInfo
                     }
                 }
+                // 其他方法，正常转发
+                method.invoke(sPackageManager, *(args ?: arrayOfNulls<Any>(0)))
             }
+
+            // 把代理对象设置回去
+            packageManagerField.set(currentActivityThread, proxy)
+
         } catch (e: Throwable) {
             e.printStackTrace()
         }

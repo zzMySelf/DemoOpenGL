@@ -3,6 +3,7 @@ package com.baidu.demoopengl
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import com.example.plugin.App
 import com.example.plugin.PluginHookHelper
 
 /**
@@ -19,5 +20,6 @@ class HostApplication: Application() {
     override fun onCreate() {
         super.onCreate()
         Log.e("zyl", "HostApplication  onCreate")
+        App.context = this
     }
 }

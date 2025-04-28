@@ -14,19 +14,24 @@ import com.baidu.demoopengl.opengl.MainActivity
 import com.baidu.demoopengl.video.Camera2Activity
 import com.baidu.demoopengl.video.MediaRecorderActivity
 import com.example.plugin.PluginHookHelper
-import com.example.plugin.PluginManager
+import com.example.plugin.PluginLoadManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.opencv.android.OpenCVLoader
 import java.io.File
 import java.io.FileOutputStream
-import java.io.IOException
 
 class RouterActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        PluginHookHelper.hookAmsBinderProxy()
-        PluginHookHelper.hookHandler()
+        lifecycleScope.launch {
+            PluginLoadManager.loadPlugin(this@RouterActivity)
+
+            PluginHookHelper.hookAmsBinderProxy()
+            PluginHookHelper.hookHandler()
+            PluginHookHelper.hookPackageManager()
+        }
 
         setContentView(R.layout.activity_router)
 
@@ -79,9 +84,7 @@ class RouterActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.load_plugin).setOnClickListener {
             lifecycleScope.launch {
-                PluginManager.loadPlugin(this@RouterActivity.applicationContext)
-                delay(1000)
-                PluginManager.startPluginActivity(this@RouterActivity)
+                PluginLoadManager.startPluginActivity(this@RouterActivity)
             }
         }
     }
