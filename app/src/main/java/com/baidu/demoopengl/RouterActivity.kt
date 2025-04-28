@@ -8,10 +8,15 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.baidu.demoopengl.opencv.PictureFrameActivity
 import com.baidu.demoopengl.opengl.MainActivity
 import com.baidu.demoopengl.video.Camera2Activity
 import com.baidu.demoopengl.video.MediaRecorderActivity
+import com.example.plugin.PluginHookHelper
+import com.example.plugin.PluginManager
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.opencv.android.OpenCVLoader
 import java.io.File
 import java.io.FileOutputStream
@@ -20,6 +25,9 @@ import java.io.IOException
 class RouterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        PluginHookHelper.hookAmsBinderProxy()
+        PluginHookHelper.hookHandler()
+
         setContentView(R.layout.activity_router)
 
 
@@ -67,6 +75,14 @@ class RouterActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.opencv_picture_frame).setOnClickListener {
             PictureFrameActivity.start(this@RouterActivity)
+        }
+
+        findViewById<Button>(R.id.load_plugin).setOnClickListener {
+            lifecycleScope.launch {
+                PluginManager.loadPlugin(this@RouterActivity.applicationContext)
+                delay(1000)
+                PluginManager.startPluginActivity(this@RouterActivity)
+            }
         }
     }
 

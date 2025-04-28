@@ -31,10 +31,10 @@ class PictureFrameActivity : AppCompatActivity() {
     }
 
     private fun loadImage() {
-        val path = "/sdcard/Pictures/BD_1694785172003.jpg"
-        val originalBitmap = BitmapFactory.decodeFile(path);
-        nativeRender.native_addRoundedCorners(originalBitmap, 17, 36)
-        pictureView?.setImageBitmap(originalBitmap);
+//        val path = "/sdcard/Pictures/BD_1694785172003.jpg"
+//        val originalBitmap = BitmapFactory.decodeFile(path);
+//        nativeRender.native_addRoundedCorners(originalBitmap, 17, 36)
+//        pictureView?.setImageBitmap(originalBitmap);
 
 //        val bgBitmap = BitmapFactory.decodeFile(path);
 //        nativeRender.native_blurBitmap(bgBitmap);
