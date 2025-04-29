@@ -70,12 +70,17 @@ object PluginHookHelper {
                             args[i] = "com.baidu.demoopengl"
                         }
                     }
-                    if (raw?.component?.packageName == PLUGIN_PKG) {
+                    if (raw?.component?.packageName == PLUGIN_PKG
+                        || raw?.component?.className?.startsWith(PLUGIN_PKG) == true) {
                         val newIntent = Intent();
                         newIntent.component = ComponentName(
                             "com.baidu.demoopengl",
                             "com.example.plugin.PluginProxyActivity"
                         )
+                        if (raw.component?.packageName != PLUGIN_PKG) {
+                            val old = raw.component
+                            raw.component = ComponentName(PLUGIN_PKG, old?.className ?: "")
+                        }
                         newIntent.putExtra(TARGET_INTENT, raw)
                         args[index] = newIntent
 

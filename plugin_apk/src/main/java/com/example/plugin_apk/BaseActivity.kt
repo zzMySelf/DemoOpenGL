@@ -53,12 +53,25 @@ open class BaseActivity: Activity() {
         super.attachBaseContext(wrappedContext)
     }
 
-    private fun createAssetManager(context: Context): AssetManager? {
-        Log.e("zyl", "创建createAssetManager")
+    override fun getClassLoader(): ClassLoader {
+        return wrappedContext?.classLoader ?: super.getClassLoader()
+    }
 
+    override fun getAssets(): AssetManager {
+        return wrappedContext?.assets ?: super.getAssets()
+    }
+
+    override fun getResources(): Resources {
+        return wrappedContext?.resources ?: super.getResources()
+    }
+
+    override fun getOpPackageName(): String {
+        return wrappedContext?.packageName ?: super.getOpPackageName()
+    }
+
+    private fun createAssetManager(context: Context): AssetManager? {
         return try {
             val apkPath = "/storage/emulated/0/Android/data/com.baidu.demoopengl/files/plugin_apk-debug.apk"
-            Log.e("zyl", "plugin createAssetManager $apkPath")
             val assetManager = AssetManager::class.java.newInstance()
             val addAssetPathMethod = AssetManager::class.java.getMethod("addAssetPath", String::class.java)
             addAssetPathMethod.invoke(assetManager, apkPath)

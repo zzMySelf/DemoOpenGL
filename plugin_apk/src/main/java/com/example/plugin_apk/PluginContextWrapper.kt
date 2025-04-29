@@ -10,8 +10,10 @@ import android.content.res.Resources
  * @author zhangyelei
  */
 
+private const val HOST_PACKAGE_NAME = "com.baidu.demoopengl"
+
 class PluginContextWrapper(
-    val base: Context,
+    private val base: Context,
     private val pluginClassLoader: ClassLoader,
     private val pluginResources: Resources?,
     private val pluginAssetManager: AssetManager?
@@ -34,7 +36,7 @@ class PluginContextWrapper(
     }
 
     override fun getPackageName(): String {
-        return "com.example.plugin_apk"
+        return HOST_PACKAGE_NAME
     }
 
 }
