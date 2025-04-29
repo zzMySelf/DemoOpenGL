@@ -31,7 +31,6 @@ class RouterActivity : AppCompatActivity() {
             PluginHookHelper.hookAmsBinderProxy()
             PluginHookHelper.hookHandler()
             PluginHookHelper.hookPackageManager()
-            PluginHookHelper.hookResources()
         }
 
         setContentView(R.layout.activity_router)

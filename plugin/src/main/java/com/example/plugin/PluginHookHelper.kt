@@ -66,6 +66,9 @@ object PluginHookHelper {
                             raw = args[i] as Intent
                             index = i
                         }
+                        if (args[i] is String && args[i] == PLUGIN_PKG) {
+                            args[i] = "com.baidu.demoopengl"
+                        }
                     }
                     if (raw?.component?.packageName == PLUGIN_PKG) {
                         val newIntent = Intent();
@@ -370,59 +373,6 @@ object PluginHookHelper {
             packageManagerField.set(currentActivityThread, proxy)
 
         } catch (e: Throwable) {
-            e.printStackTrace()
-        }
-    }
-
-    @SuppressLint("PrivateApi")
-    fun hookResources() {
-        try {
-            val base = App.baseContext() ?: return
-            val resources = PluginLoadManager.pluginResources ?: return
-
-            // 通过反射替换主工程context中LoadedApk的mResources字段
-            val baseClass: Class<*> = base.javaClass
-            val mResourcesField: Field = baseClass.getDeclaredField("mResources")
-            mResourcesField.isAccessible = true
-            mResourcesField.set(base, resources)
-
-            // 获取LoadedApk对象并替换mResources字段
-            val loadedApk = getPackageInfo(base)
-            val loadedApkClass: Class<*>? = loadedApk?.javaClass
-            loadedApkClass ?: return
-            val mResourcesFieldInLoadedApk: Field = loadedApkClass.getDeclaredField("mResources")
-            mResourcesFieldInLoadedApk.isAccessible = true
-            mResourcesFieldInLoadedApk.set(loadedApk, resources)
-
-            // 获取ActivityThread对象并替换mResourceManager字段
-            val activityThread = getActivityThread(base)
-            val resManagerField: Field? = activityThread?.javaClass?.getDeclaredField("mResourcesManager")
-            resManagerField ?: return
-            resManagerField.isAccessible = true
-            val resManager = resManagerField.get(activityThread)
-
-            // 处理不同版本的Android
-            if (Build.VERSION.SDK_INT < 24) {
-                // Android N以下
-                val mActiveResourcesField: Field = resManager.javaClass.getDeclaredField("mActiveResources")
-                mActiveResourcesField.isAccessible = true
-                val activeResources = (mActiveResourcesField.get(resManager) as Map<*, WeakReference<Resources>>).toMutableMap()
-                val key = activeResources.keys.iterator().next()
-                val weakReference = WeakReference(resources)
-                activeResources[key] = weakReference
-            } else {
-                // Android N及以上
-                val mResourceImplsField: Field = resManager.javaClass.getDeclaredField("mResourceImpls")
-                mResourceImplsField.isAccessible = true
-                val resourceImpls = (mResourceImplsField.get(resManager) as Map<*, *>).toMutableMap()
-                val key = resourceImpls.keys.iterator().next()
-                val mResourcesImplField: Field = Resources::class.java.getDeclaredField("mResourcesImpl")
-                mResourcesImplField.isAccessible = true
-                val resourcesImpl = mResourcesImplField.get(resources)
-                resourceImpls[key] = WeakReference(resourcesImpl)
-            }
-            Log.i(TAG, "hook resources success ！！！")
-        } catch (e: Exception) {
             e.printStackTrace()
         }
     }

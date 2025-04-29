@@ -1,4 +1,4 @@
-package com.example.plugin
+package com.example.plugin_apk
 
 import android.content.Context
 import android.content.ContextWrapper
@@ -9,8 +9,9 @@ import android.content.res.Resources
  * Day：2025/4/28 14:52
  * @author zhangyelei
  */
+
 class PluginContextWrapper(
-    private val base: Context,
+    val base: Context,
     private val pluginClassLoader: ClassLoader,
     private val pluginResources: Resources?,
     private val pluginAssetManager: AssetManager?
@@ -33,9 +34,7 @@ class PluginContextWrapper(
     }
 
     override fun getPackageName(): String {
-        // 返回插件的包名
-        return "com.example.minedemo" // 插件的包名
+        return "com.example.plugin_apk"
     }
-
 
 }

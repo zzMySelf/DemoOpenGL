@@ -23,9 +23,6 @@ class HostApplication: Application() {
         super.onCreate()
         Log.e("zyl", "HostApplication  onCreate")
         App.context = this
-
-        PluginLoadManager.createAssetManager(this)
-        PluginLoadManager.createResources(this)
     }
 
     override fun getResources(): Resources {

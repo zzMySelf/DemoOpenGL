@@ -10,5 +10,5 @@ import android.content.Context
 object App {
     var context: Application? = null
 
-    fun baseContext() = context?.applicationContext
+    fun baseContext() = context?.baseContext
 }

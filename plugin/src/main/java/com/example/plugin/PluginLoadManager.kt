@@ -20,7 +20,7 @@ import java.util.zip.ZipFile
  */
 internal const val PLUGIN_ACTIVITY_CLASS_NAME = "com.example.plugin_apk.MainActivity"
 internal const val PLUGIN_PKG = "com.example.plugin_apk"
-internal const val PLUGIN_NAME = "debug-plugin.apk"
+internal const val PLUGIN_NAME = "plugin_apk-debug.apk"
 
 internal const val TAG = "zyl"
 
@@ -32,7 +32,6 @@ object PluginLoadManager {
      * Application 创建
      */
     var pluginClassLoader: DexClassLoader? = null
-    var pluginContext: PluginContextWrapper? = null
 
     @SuppressLint("PrivateApi")
     fun loadPlugin(context: Context) {
@@ -44,15 +43,6 @@ object PluginLoadManager {
 
         val nativeLibDir = getPluginNativeLibDir(apkPath)
         pluginClassLoader = createDexClassLoader(context, apkPath, nativeLibDir)
-
-        pluginClassLoader?.let {
-            pluginContext = PluginContextWrapper(
-                context.applicationContext,
-                it,
-                pluginResources,
-                pluginAssetManager
-            )
-        }
 
         val clazz = loadPluginClass(PLUGIN_ACTIVITY_CLASS_NAME)
         if (clazz == null) {
@@ -102,30 +92,7 @@ object PluginLoadManager {
         return ""
     }
 
-    fun createAssetManager(context: Context): AssetManager? {
-        Log.e("zyl", "创建createAssetManager")
 
-        return try {
-            val apkPath = File(context.getExternalFilesDir(null), PLUGIN_NAME).absolutePath
-            val assetManager = AssetManager::class.java.newInstance()
-            val addAssetPathMethod = AssetManager::class.java.getMethod("addAssetPath", String::class.java)
-            addAssetPathMethod.invoke(assetManager, apkPath)
-            pluginAssetManager = assetManager
-            pluginAssetManager
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    fun createResources(context: Context): Resources? {
-        Log.e("zyl", "创建createResources")
-
-        pluginAssetManager?.let {
-            pluginResources = Resources(it, context.resources.displayMetrics, context.resources.configuration)
-        }
-        return pluginResources
-    }
 
     fun startPluginActivity(context: Context) {
         Log.e("zyl", "点击跳转插件页面")
@@ -135,7 +102,6 @@ object PluginLoadManager {
             PLUGIN_PKG,
             PLUGIN_ACTIVITY_CLASS_NAME
         )
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK  // 添加这个标志
-        pluginContext?.startActivity(intent)
+        context.startActivity(intent)
     }
 }
