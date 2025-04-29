@@ -10,8 +10,10 @@ import android.content.res.Resources
  * @author zhangyelei
  */
 class PluginContextWrapper(
-    base: Context,
-    private val pluginClassLoader: ClassLoader
+    private val base: Context,
+    private val pluginClassLoader: ClassLoader,
+    private val pluginResources: Resources?,
+    private val pluginAssetManager: AssetManager?
 ) : ContextWrapper(base) {
 
     override fun getClassLoader(): ClassLoader {
@@ -19,15 +21,15 @@ class PluginContextWrapper(
         return pluginClassLoader
     }
 
-    override fun getResources(): Resources {
+    override fun getResources(): Resources? {
         // 如果插件有自定义的资源，重写此方法以返回插件的资源
-        return super.getResources() // 或者返回插件的资源对象
+        return pluginResources // 或者返回插件的资源对象
     }
 
     // 你可以根据需求重写其他方法，比如获取资产、文件等
-    override fun getAssets(): AssetManager {
+    override fun getAssets(): AssetManager? {
         // 返回插件的 AssetManager
-        return super.getAssets() // 或者返回插件的 AssetManager
+        return pluginAssetManager // 或者返回插件的 AssetManager
     }
 
     override fun getPackageName(): String {
@@ -35,5 +37,5 @@ class PluginContextWrapper(
         return "com.example.minedemo" // 插件的包名
     }
 
-    // 其他必要的重写方法
+
 }

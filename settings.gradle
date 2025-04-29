@@ -16,3 +16,4 @@ rootProject.name = "DemoOpenGL"
 include ':app'
 include ':opencv'
 include ':plugin'
+include ':plugin_apk'

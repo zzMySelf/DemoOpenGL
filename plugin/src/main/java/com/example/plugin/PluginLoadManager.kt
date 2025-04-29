@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
+import android.content.res.AssetManager
+import android.content.res.Resources
 import android.os.Process
 import android.util.ArrayMap
 import android.util.Log
@@ -16,18 +18,25 @@ import java.util.zip.ZipFile
  * Day：2025/4/28 10:52
  * @author zhangyelei
  */
-internal const val PLUGIN_ACTIVITY_CLASS_NAME = "com.example.minedemo.activity.RouterActivity"
-internal const val PLUGIN_PKG = "com.example.minedemo"
+internal const val PLUGIN_ACTIVITY_CLASS_NAME = "com.example.plugin_apk.MainActivity"
+internal const val PLUGIN_PKG = "com.example.plugin_apk"
+internal const val PLUGIN_NAME = "debug-plugin.apk"
 
 internal const val TAG = "zyl"
 
 object PluginLoadManager {
+    var pluginAssetManager: AssetManager? = null
+    var pluginResources: Resources? = null
+
+    /**
+     * Application 创建
+     */
     var pluginClassLoader: DexClassLoader? = null
     var pluginContext: PluginContextWrapper? = null
 
     @SuppressLint("PrivateApi")
     fun loadPlugin(context: Context) {
-        val apkPath = File(context.getExternalFilesDir(null), "debug-plugin.apk").absolutePath
+        val apkPath = File(context.getExternalFilesDir(null), PLUGIN_NAME).absolutePath
         if (!File(apkPath).exists()) {
             Log.e("zyl", "Plugin APK不存在！${apkPath}")
             return
@@ -37,7 +46,12 @@ object PluginLoadManager {
         pluginClassLoader = createDexClassLoader(context, apkPath, nativeLibDir)
 
         pluginClassLoader?.let {
-            pluginContext = PluginContextWrapper(context.applicationContext, it)
+            pluginContext = PluginContextWrapper(
+                context.applicationContext,
+                it,
+                pluginResources,
+                pluginAssetManager
+            )
         }
 
         val clazz = loadPluginClass(PLUGIN_ACTIVITY_CLASS_NAME)
@@ -65,7 +79,12 @@ object PluginLoadManager {
     ): DexClassLoader {
         val dexOutputDir = context.getDir("dex", Context.MODE_PRIVATE)
         val dexOutputPath = dexOutputDir.absolutePath
-        val loader = DexClassLoader(dexPath, dexOutputPath, nativeLibDir, context.applicationContext.classLoader)
+        val loader = DexClassLoader(
+            dexPath,
+            dexOutputPath,
+            nativeLibDir,
+            context.classLoader
+        )
         Log.e("zyl", "Plugin DexClassLoader dexPath:$dexPath dexOutputPath:$dexOutputPath nativeLibDir:$nativeLibDir")
         return loader
     }
@@ -83,7 +102,34 @@ object PluginLoadManager {
         return ""
     }
 
+    fun createAssetManager(context: Context): AssetManager? {
+        Log.e("zyl", "创建createAssetManager")
+
+        return try {
+            val apkPath = File(context.getExternalFilesDir(null), PLUGIN_NAME).absolutePath
+            val assetManager = AssetManager::class.java.newInstance()
+            val addAssetPathMethod = AssetManager::class.java.getMethod("addAssetPath", String::class.java)
+            addAssetPathMethod.invoke(assetManager, apkPath)
+            pluginAssetManager = assetManager
+            pluginAssetManager
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    fun createResources(context: Context): Resources? {
+        Log.e("zyl", "创建createResources")
+
+        pluginAssetManager?.let {
+            pluginResources = Resources(it, context.resources.displayMetrics, context.resources.configuration)
+        }
+        return pluginResources
+    }
+
     fun startPluginActivity(context: Context) {
+        Log.e("zyl", "点击跳转插件页面")
+
         val intent = Intent()
         intent.setClassName(
             PLUGIN_PKG,

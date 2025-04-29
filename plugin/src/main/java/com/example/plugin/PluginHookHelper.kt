@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
+import android.content.res.Resources
 import android.os.Build
 import android.os.Handler
 import android.os.Message
@@ -14,9 +15,8 @@ import android.os.Process
 import android.util.ArrayMap
 import android.util.Log
 import java.io.File
+import java.lang.ref.WeakReference
 import java.lang.reflect.Field
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 
 /**
@@ -67,7 +67,7 @@ object PluginHookHelper {
                             index = i
                         }
                     }
-                    if (raw?.component?.packageName == "com.example.minedemo") {
+                    if (raw?.component?.packageName == PLUGIN_PKG) {
                         val newIntent = Intent();
                         newIntent.component = ComponentName(
                             "com.baidu.demoopengl",
@@ -102,7 +102,7 @@ object PluginHookHelper {
 
                     // 替换loadedApk中的classloader
                     Log.e("zyl", "开始替换loadedApk中的classloader")
-                    val apkPath = File(App.baseContext()?.getExternalFilesDir(null), "debug-plugin.apk").absolutePath
+                    val apkPath = File(App.baseContext()?.getExternalFilesDir(null), PLUGIN_NAME).absolutePath
                     val launchActivityItemClass = Class.forName("android.app.servertransaction.LaunchActivityItem")
                     if (launchActivityItem != null) {
                         replaceClassloader(apkPath, launchActivityItemClass, launchActivityItem)
@@ -310,7 +310,7 @@ object PluginHookHelper {
                 // 替换 ActivityInfo 中包名
                 replacePkgName(mLaunchActivityItemCls, obj, pluginPkgName)
                 // 设置 ClassLoader
-                setClassloader(loadedApk!!)
+                setLoadedApkClassloader(loadedApk!!)
             } else {
                 Log.i(TAG, "get plugin pkg name failed")
             }
@@ -328,7 +328,7 @@ object PluginHookHelper {
     }
 
     @Throws(Exception::class)
-    private fun setClassloader(loadedApk: Any) {
+    private fun setLoadedApkClassloader(loadedApk: Any) {
         val dexClassLoader = PluginLoadManager.pluginClassLoader
         val mClassLoaderField = loadedApk.javaClass.getDeclaredField("mClassLoader")
         mClassLoaderField.isAccessible = true
@@ -372,5 +372,74 @@ object PluginHookHelper {
         } catch (e: Throwable) {
             e.printStackTrace()
         }
+    }
+
+    @SuppressLint("PrivateApi")
+    fun hookResources() {
+        try {
+            val base = App.baseContext() ?: return
+            val resources = PluginLoadManager.pluginResources ?: return
+
+            // 通过反射替换主工程context中LoadedApk的mResources字段
+            val baseClass: Class<*> = base.javaClass
+            val mResourcesField: Field = baseClass.getDeclaredField("mResources")
+            mResourcesField.isAccessible = true
+            mResourcesField.set(base, resources)
+
+            // 获取LoadedApk对象并替换mResources字段
+            val loadedApk = getPackageInfo(base)
+            val loadedApkClass: Class<*>? = loadedApk?.javaClass
+            loadedApkClass ?: return
+            val mResourcesFieldInLoadedApk: Field = loadedApkClass.getDeclaredField("mResources")
+            mResourcesFieldInLoadedApk.isAccessible = true
+            mResourcesFieldInLoadedApk.set(loadedApk, resources)
+
+            // 获取ActivityThread对象并替换mResourceManager字段
+            val activityThread = getActivityThread(base)
+            val resManagerField: Field? = activityThread?.javaClass?.getDeclaredField("mResourcesManager")
+            resManagerField ?: return
+            resManagerField.isAccessible = true
+            val resManager = resManagerField.get(activityThread)
+
+            // 处理不同版本的Android
+            if (Build.VERSION.SDK_INT < 24) {
+                // Android N以下
+                val mActiveResourcesField: Field = resManager.javaClass.getDeclaredField("mActiveResources")
+                mActiveResourcesField.isAccessible = true
+                val activeResources = (mActiveResourcesField.get(resManager) as Map<*, WeakReference<Resources>>).toMutableMap()
+                val key = activeResources.keys.iterator().next()
+                val weakReference = WeakReference(resources)
+                activeResources[key] = weakReference
+            } else {
+                // Android N及以上
+                val mResourceImplsField: Field = resManager.javaClass.getDeclaredField("mResourceImpls")
+                mResourceImplsField.isAccessible = true
+                val resourceImpls = (mResourceImplsField.get(resManager) as Map<*, *>).toMutableMap()
+                val key = resourceImpls.keys.iterator().next()
+                val mResourcesImplField: Field = Resources::class.java.getDeclaredField("mResourcesImpl")
+                mResourcesImplField.isAccessible = true
+                val resourcesImpl = mResourcesImplField.get(resources)
+                resourceImpls[key] = WeakReference(resourcesImpl)
+            }
+            Log.i(TAG, "hook resources success ！！！")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun getPackageInfo(context: Context): Any? {
+        // 实现获取 LoadedApk 的方法
+        val packageInfoField: Field = context.javaClass.getDeclaredField("mPackageInfo")
+        packageInfoField.isAccessible = true
+        return packageInfoField.get(context)
+    }
+
+    @SuppressLint("PrivateApi")
+    private fun getActivityThread(context: Context): Any? {
+        val activityThreadClass = Class.forName("android.app.ActivityThread")
+        val currentActivityThreadField: Field = activityThreadClass.getDeclaredField("sCurrentActivityThread")
+        currentActivityThreadField.isAccessible = true
+        return currentActivityThreadField.get(null)
     }
 }
